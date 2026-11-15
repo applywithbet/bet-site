@@ -23,7 +23,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;700&display=swap" rel="stylesheet">
 <script>document.documentElement.classList.add("js");</script>
 <script>(function(){var t=null;try{t=localStorage.getItem("bet-theme")}catch(e){}if(t!=="light"&&t!=="dark")t=window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.setAttribute("data-theme",t)})();</script>
-<script defer src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>
+<!-- Touch screens scroll natively (html.touch); mouse and trackpad viewers get Lenis smooth scrolling -->
+<script>(function(){var fine=window.matchMedia&&matchMedia("(hover: hover) and (pointer: fine)").matches;if(!fine){document.documentElement.classList.add("touch");return}var s=document.createElement("script");s.src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js";s.async=false;s.setAttribute("data-lenis","");document.head.appendChild(s)})();</script>
 <style>
 /* Layout: matches the Bet dashboard. Bet and a greeting up top, a tab row, then one card per demo: title, one line, chips, video. */
 :root {
@@ -615,6 +616,7 @@ html:not(.js) .theme-toggle { display: none; }      /* it needs the script */
   .fc-track:hover .fc-list, .fc-track:focus-within .fc-list { animation-play-state: paused; }
 }
 @keyframes ticker { to { transform: translateX(calc(-100% - 12px)); } }
+.fc-track.is-off .fc-list { animation-play-state: paused; }   /* off screen: nothing moves */
 @media (max-width: 600px) {
   .fc-track, .fc-list { gap: 10px; }
   .fc-card { padding: 9px 15px; font-size: 0.88rem; }
@@ -1350,7 +1352,7 @@ html.lenis, html.lenis body { height: auto; }
 /* Phones: same layout as the laptop, scaled down, no full-screen gaps */
 @media (max-width: 600px) {
   .wrap { gap: 18px; padding: 0 14px 32px; }
-  :root { --peek: clamp(130px, 16vh, 160px); }
+  :root { --peek: clamp(88px, 11vh, 100px); }   /* a smaller glimpse of the sheet: its rounded edge and the pills */
   .hero { padding: 64px 18px calc(var(--peek) + 16px); }
   .hero-content { gap: 16px; }
   .hero-mascot { --mw: min(42vw, 170px); }
@@ -1386,6 +1388,33 @@ html.lenis, html.lenis body { height: auto; }
 }
 @media (min-width: 768px) and (max-width: 1199px) { .stage-spot { right: 20px; width: 60px; } }
 @media (max-width: 767px) { .stage-spot, .intro-spot { display: none; } }
+/* Touch screens scroll natively, so nothing is moved from script on scroll there: the hero stays put
+   (sticky) while the sheet slides up over it, and Bet keeps its place in the hero instead of travelling. */
+@media (prefers-reduced-motion: no-preference) {
+  .touch .hero.stick { position: sticky; top: 0; }   /* "stick" is set by script only when the hero fits the screen */
+}
+.hero.is-past .blob, .hero.is-past .hero-mascot-fig { animation-play-state: paused; }   /* nothing animates once the sheet covers it */
+/* A demo that can't start by itself (low power mode, reduced motion, data saver) shows a play badge; a tap on the player starts it. */
+.play-badge {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 64px; height: 64px;
+  translate: -50% -50%;
+  display: none;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--surface) 84%, transparent);
+  color: var(--ink);
+  box-shadow: 0 0 0 1px var(--glass-edge), 0 10px 30px -10px rgb(10 12 30 / 0.45);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+}
+.play-badge svg { width: 26px; height: 26px; margin-left: 3px; }
+.player.wants-play .play-badge { display: grid; }
+.player.wants-play { cursor: pointer; }
 /* Liquid glass, the same recipe as the top bar: a tinted gradient over a blurred, saturated backdrop,
    an inset rim light, a hairline edge, a sheen across the top and a layered shadow. */
 .cta-ghost, .fc-card {
@@ -1493,7 +1522,7 @@ html.lenis, html.lenis body { height: auto; }
           </div>
           <div class="shot">
             <div class="player">
-              <video src="demo-1.mp4" poster="poster-1.jpg" muted loop playsinline preload="metadata" disablepictureinpicture aria-label="Demo 1: the first screen you see"></video>
+              <video src="demo-1.mp4" poster="poster-1.jpg" muted loop playsinline preload="none" disablepictureinpicture aria-label="Demo 1: the first screen you see"></video>
               <div class="placeholder" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 8.5v7l6-3.5z" fill="currentColor"/></svg>Video coming soon</div>
             </div>
           </div>
@@ -1505,7 +1534,7 @@ html.lenis, html.lenis body { height: auto; }
           </div>
           <div class="shot">
             <div class="player">
-              <video src="demo-2.mp4" poster="poster-2.jpg" muted loop playsinline preload="metadata" disablepictureinpicture aria-label="Demo 2: your customized dashboard"></video>
+              <video src="demo-2.mp4" poster="poster-2.jpg" muted loop playsinline preload="none" disablepictureinpicture aria-label="Demo 2: your customized dashboard"></video>
               <div class="placeholder" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 8.5v7l6-3.5z" fill="currentColor"/></svg>Video coming soon</div>
             </div>
           </div>
@@ -1517,7 +1546,7 @@ html.lenis, html.lenis body { height: auto; }
           </div>
           <div class="shot">
             <div class="player">
-              <video src="demo-3.mp4" poster="poster-3.jpg" muted loop playsinline preload="metadata" disablepictureinpicture aria-label="Demo 3: apply with autofill"></video>
+              <video src="demo-3.mp4" poster="poster-3.jpg" muted loop playsinline preload="none" disablepictureinpicture aria-label="Demo 3: apply with autofill"></video>
               <div class="placeholder" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 8.5v7l6-3.5z" fill="currentColor"/></svg>Video coming soon</div>
             </div>
           </div>
@@ -1529,7 +1558,7 @@ html.lenis, html.lenis body { height: auto; }
           </div>
           <div class="shot">
             <div class="player">
-              <video src="demo-3b.mp4" poster="poster-3b.jpg" muted loop playsinline preload="metadata" disablepictureinpicture aria-label="Demo 3b: autofill on Greenhouse"></video>
+              <video src="demo-3b.mp4" poster="poster-3b.jpg" muted loop playsinline preload="none" disablepictureinpicture aria-label="Demo 3b: autofill on Greenhouse"></video>
               <div class="placeholder" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 8.5v7l6-3.5z" fill="currentColor"/></svg>Video coming soon</div>
             </div>
           </div>
@@ -1541,7 +1570,7 @@ html.lenis, html.lenis body { height: auto; }
           </div>
           <div class="shot">
             <div class="player">
-              <video src="demo-4.mp4" poster="poster-4.jpg" muted loop playsinline preload="metadata" disablepictureinpicture aria-label="Demo 4: use your tracker"></video>
+              <video src="demo-4.mp4" poster="poster-4.jpg" muted loop playsinline preload="none" disablepictureinpicture aria-label="Demo 4: use your tracker"></video>
               <div class="placeholder" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 8.5v7l6-3.5z" fill="currentColor"/></svg>Video coming soon</div>
             </div>
           </div>
@@ -1673,36 +1702,84 @@ html.lenis, html.lenis body { height: auto; }
 <script>
 (function () {
   var calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var fine = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;   // mouse or trackpad
+  var touch = !fine;                                                                                   // phones and tablets: native scrolling
   var buddyWake = null;   // set up once Bet is lifted out of the hero (below)
 
-  // Show the "coming soon" panel for any video that hasn't been uploaded yet.
-  document.querySelectorAll('.player').forEach(function (p) {
+  // Demo players. The active card's video plays by itself where the browser allows it; where it doesn't
+  // (low power mode, reduced motion, data saver) a play badge appears and a tap on the player starts it.
+  // A video is only fetched once its card is near the screen. One that hasn't been uploaded yet shows
+  // the "coming soon" panel.
+  var players = Array.prototype.slice.call(document.querySelectorAll('.player'));
+  function wantsPlay(v, on) { var p = v.closest('.player'); if (p) p.classList.toggle('wants-play', on); }
+  function tryPlay(v) {
+    if (!v || v.hidden) return;
+    var pr = v.play();
+    if (pr && pr.then) pr.then(function () { wantsPlay(v, false); }, function () { wantsPlay(v, true); });
+    else wantsPlay(v, false);
+  }
+  players.forEach(function (p) {
     var v = p.querySelector('video');
     var ph = p.querySelector('.placeholder');
-    function missing() { v.hidden = true; ph.hidden = false; }
+    if (!v) return;
+    function missing() { v.hidden = true; if (ph) ph.hidden = false; p.classList.remove('wants-play'); }
     v.addEventListener('error', missing);
     if (v.error) missing();
+    var badge = document.createElement('button');
+    badge.type = 'button';
+    badge.className = 'play-badge';
+    badge.setAttribute('aria-label', 'Play demo');
+    badge.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>';
+    p.appendChild(badge);
+    p.addEventListener('click', function () { if (v.paused) tryPlay(v); });
+    v.addEventListener('playing', function () { wantsPlay(v, false); });
+    v.addEventListener('pause', function () {
+      var c = v.closest('.card');
+      if (c && c.classList.contains('is-active') && !v.ended) wantsPlay(v, true);   // stopped by the browser: offer a tap
+    });
   });
+  if ('IntersectionObserver' in window) {
+    var vio = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        var v = en.target.querySelector('video');
+        if (v && !v.hidden && v.preload === 'none') v.preload = 'auto';
+        vio.unobserve(en.target);
+      });
+    }, { rootMargin: '50% 0px' });
+    players.forEach(function (p) { vio.observe(p); });
+  }
 
   // Smooth scrolling (Lenis, 1.2s ease-out like the reference). Off when the viewer prefers reduced motion.
   var lenis = null;
   function smooth() {
-    if (calm || typeof window.Lenis !== 'function') return;
+    if (calm || touch || typeof window.Lenis !== 'function') return;   // touch screens keep native scrolling
     try {
       lenis = new window.Lenis({ duration: 1.2, lerp: 0, easing: function (t) { return Math.min(1, 1.001 - Math.pow(2, -10 * t)); }, autoRaf: true });
     } catch (e) { lenis = null; }
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', smooth); else smooth();
+  var lenisScript = document.querySelector('script[data-lenis]');
+  if (lenisScript && typeof window.Lenis !== 'function') lenisScript.addEventListener('load', smooth);
+  else if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', smooth); else smooth();
 
-  // In-page links glide to their target and stop just under the top bar.
+  // In-page links glide to their target and stop just under the top bar. The target is measured from the
+  // layout alone (a card that hasn't risen in yet is still offset by its transform) less its scroll margin.
+  function targetY(el) {
+    var y = 0, n = el;
+    while (n) { y += n.offsetTop; n = n.offsetParent; }
+    return Math.max(0, y - (parseFloat(getComputedStyle(el).scrollMarginTop) || 92));
+  }
   document.addEventListener('click', function (e) {
     var a = e.target.closest ? e.target.closest('a[href^="#"]') : null;
-    if (!a || !lenis) return;
+    if (!a) return;
     var id = a.getAttribute('href').slice(1);
     var el = id ? document.getElementById(id) : null;
     if (!el) return;
     e.preventDefault();
-    if (id === 'welcome') lenis.scrollTo(0); else lenis.scrollTo(el, { offset: -92 });
+    if (el.classList.contains('ap')) el.classList.add('in');   // rise now, not after the scroll has landed
+    var y = id === 'welcome' ? 0 : targetY(el);
+    if (lenis) lenis.scrollTo(y);
+    else window.scrollTo({ top: y, behavior: calm ? 'auto' : 'smooth' });
     if (history.replaceState) history.replaceState(null, '', '#' + id);
   });
 
@@ -1750,12 +1827,8 @@ html.lenis, html.lenis body { height: auto; }
       c.classList.toggle('is-active', on);
       var v = c.querySelector('video');
       if (!v || v.hidden) return;
-      if (on && !calm) {
-        var pr = v.play();
-        // if the browser blocks autoplay (e.g. low-power mode), a tap starts it
-        if (pr && pr.catch) pr.catch(function () { v.addEventListener('click', function () { v.play(); }, { once: true }); });
-      }
-      else if (!v.paused) v.pause();
+      if (on) { if (calm) wantsPlay(v, v.paused); else tryPlay(v); }   // reduced motion: nothing starts on its own
+      else { wantsPlay(v, false); if (!v.paused) v.pause(); }
     });
     var onTab = null;
     tabs.forEach(function (t) {
@@ -1765,6 +1838,13 @@ html.lenis, html.lenis body { height: auto; }
     placeLens(onTab);
     markNav(card);
   }
+
+  // Back from another tab or app: the active demo picks up again.
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden || !current || calm) return;
+    var v = current.querySelector('video');
+    if (v && !v.hidden && v.paused) tryPlay(v);
+  });
 
   // Copy an email address (mail links don't open for every viewer).
   document.querySelectorAll('.copy').forEach(function (btn) {
@@ -1870,6 +1950,14 @@ html.lenis, html.lenis body { height: auto; }
     });
   } else aps.forEach(function (el) { el.classList.add('in'); });
 
+  // The feature strip only moves while it's on screen.
+  var fcTrack = document.querySelector('.fc-track');
+  if (fcTrack && 'IntersectionObserver' in window) {
+    new IntersectionObserver(function (entries) {
+      fcTrack.classList.toggle('is-off', !entries[entries.length - 1].isIntersecting);
+    }).observe(fcTrack);
+  }
+
   // Hand-off: as the demos sheet slides up, the hero drifts up slower than the page, shrinks a
   // little and fades out by the time the sheet reaches the top bar.
   var hero = document.querySelector('.hero');
@@ -1878,9 +1966,10 @@ html.lenis, html.lenis body { height: auto; }
   function heroFx(y) {
     if (calm || !hero) return;
     var p = Math.min(1, Math.max(0, y / handoff));
-    if (p >= 1) { hero.style.visibility = 'hidden'; return; }
+    if (p >= 1) { hero.style.visibility = 'hidden'; hero.classList.add('is-past'); return; }
     hero.style.visibility = '';
-    var lag = y * (wide.matches ? 0.5 : 0.2);
+    hero.classList.remove('is-past');
+    var lag = touch ? 0 : y * (wide.matches ? 0.5 : 0.2);   // touch: the hero is sticky and scrolls natively
     hero.style.transform = 'translate3d(0,' + lag.toFixed(1) + 'px,0) scale(' + (1 - p * 0.08).toFixed(4) + ')';
     hero.style.opacity = (1 - Math.pow(p, 1.6)).toFixed(3);
     hero.style.setProperty('--hp', Math.min(1, p * 2.5).toFixed(3));   // corners round off as it recedes
@@ -1901,7 +1990,7 @@ html.lenis, html.lenis body { height: auto; }
     var defs = document.querySelector('.lg-defs');
     var brands = navigator.userAgentData && navigator.userAgentData.brands;
     var chromium = brands && brands.some(function (b) { return /Chromium/.test(b.brand); });
-    if (!topbar || !defs || !chromium) return;
+    if (!topbar || !defs || !chromium || touch || !wide.matches) return;   // desktop only: the filter re-renders every frame
     var canvas = document.createElement('canvas');
     var w0 = 0, h0 = 0, n = 0;
     function build() {
@@ -1963,11 +2052,11 @@ html.lenis, html.lenis body { height: auto; }
   // perch and, as soon as you scroll past the next perch, glides over to it, small and a little faint
   // on the way, growing back on arrival: above the headline, then beside the demos (into the top-bar
   // logo on phones), then the "bet." sign-off, then the space under the contact heading (wide screens),
-  // and finally up into the top-bar logo, where it stays.
+  // and finally up into the top-bar logo, where it stays. Mouse and trackpad only: on touch screens the
+  // page scrolls natively and a script-driven follower runs a frame behind, so Bet stays in the hero there.
   var fig = document.querySelector('.hero-mascot-fig');
   var heroBg = document.querySelector('.hero-bg');
-  var fine = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-  if (fig && hero && !calm) {
+  if (fig && hero && !calm && fine && wide.matches) {
     document.documentElement.classList.add('travel');
     var buddy = document.createElement('div');
     buddy.className = 'buddy';
@@ -2085,19 +2174,24 @@ html.lenis, html.lenis body { height: auto; }
     if (stillSpot) stillSpot.appendChild(fig.cloneNode(true));
   }
 
-  // Active demo: the latest card to become half visible in the direction you're scrolling
-  // (so scrolling down hands off to the next card as it comes in, scrolling up hands back).
-  var lastY = window.scrollY || 0, dir = 1;
+  // Active demo: the card whose video shows the most. The current one keeps playing until another shows
+  // more of itself, so the hand-off happens between one card and the next whichever way you scroll. (On a
+  // phone two or three short cards fit on screen at once; a rule that looked ahead to the next card left
+  // the video in front of you paused on its poster.)
   function pick() {
-    var top = 72, vh = window.innerHeight, found = [];
+    var top = 72, vh = window.innerHeight, best = null, bestF = 0, bestMid = 0, curF = 0;
     cards.forEach(function (c) {
-      var r = c.getBoundingClientRect();
-      var seen = Math.min(r.bottom, vh) - Math.max(r.top, top);
-      var need = Math.min(r.height, (vh - top) * 0.8) * 0.5;
-      if (seen >= need) found.push(c);
+      var p = c.querySelector('.player') || c;
+      var r = p.getBoundingClientRect();
+      if (!r.height) return;
+      var f = Math.max(0, Math.min(r.bottom, vh) - Math.max(r.top, top)) / r.height;
+      var mid = Math.abs((r.top + r.bottom) / 2 - (top + vh) / 2);   // distance from the middle of the view
+      if (c === current) curF = f;
+      if (f > bestF + 0.001 || (f > 0 && Math.abs(f - bestF) <= 0.001 && mid < bestMid)) { best = c; bestF = f; bestMid = mid; }
     });
-    if (!found.length) return null;
-    return dir < 0 ? found[0] : found[found.length - 1];
+    if (!best) return null;
+    if (current && curF >= bestF - 0.001) return current;   // still showing as much as any other: keep it
+    return best;
   }
 
   // Native scrolling. Once per frame: hero and top bar effects, then pick the active demo.
@@ -2105,7 +2199,6 @@ html.lenis, html.lenis body { height: auto; }
   function update() {
     queued = false;
     var y = window.scrollY || 0;
-    if (y !== lastY) { dir = y > lastY ? 1 : -1; lastY = y; }
     heroFx(y);
     navFx(y);
     var best = pick();
@@ -2122,6 +2215,7 @@ html.lenis, html.lenis body { height: auto; }
   var introTitle = document.querySelector('.intro-title');
   function layout() {
     if (demos) handoff = Math.max(1, demos.getBoundingClientRect().top + window.scrollY - 92);
+    if (touch && hero) hero.classList.toggle('stick', hero.offsetHeight <= window.innerHeight + 1);   // a hero taller than the screen (landscape) scrolls as usual
     heroFx(window.scrollY || 0);
     placeLens(document.querySelector('.tab[aria-current="true"]'), true);
     if (buddyWake) buddyWake(600);
