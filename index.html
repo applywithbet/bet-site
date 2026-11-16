@@ -790,12 +790,13 @@ html:not(.js) .theme-toggle { display: none; }      /* it needs the script */
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   opacity: 0;
-  transition: opacity 0.3s ease;
+  visibility: hidden;          /* not drawn at all while hidden: a blur kept over a playing video costs the phone every frame */
+  transition: opacity 0.3s ease, visibility 0s linear 0.3s;
   pointer-events: none;
 }
 .wait-dots i { width: 5px; height: 5px; border-radius: 50%; background: var(--muted); opacity: 0.35; }
-.player.is-waiting .wait-dots { opacity: 1; }
-.player.wants-play .wait-dots { opacity: 0; }
+.player.is-waiting .wait-dots { opacity: 1; visibility: visible; transition: opacity 0.3s ease, visibility 0s; }
+.player.wants-play .wait-dots { opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0s linear 0.3s; }
 @media (prefers-reduced-motion: no-preference) {
   .player.is-waiting .wait-dots i { animation: wait-dot 1.2s ease-in-out infinite; }
   .player.is-waiting .wait-dots i:nth-child(2) { animation-delay: 0.16s; }
@@ -1431,6 +1432,10 @@ html.lenis, html.lenis body { height: auto; }
     transform: none;
     transition: opacity 0.6s cubic-bezier(0.44, 0, 0.56, 1) 0.1s, transform 0.6s cubic-bezier(0.44, 0, 0.56, 1) 0.1s;
   }
+  .js .ap.ap-done { will-change: auto; }   /* risen: no layer of its own to keep in memory (set by script) */
+  /* Phones fling past the demos faster than a fade can finish, so the cards showed up blank and then blinked
+     in. There they only rise, already in full view. */
+  .touch.js .card.ap { opacity: 1; }
 }
 
 /* Load-in for the hero, in order: the gradient blooms, Bet floats up behind it, then the words,
@@ -1558,7 +1563,55 @@ html.lenis, html.lenis body { height: auto; }
   .touch .hero.stick { pointer-events: none; }
   .touch .hero.stick .hero-content { pointer-events: auto; }
 }
+/* The hand-off on touch screens is run by the browser from the scroll position itself (off the main thread in
+   Chrome and Safari 26.4+), so it keeps pace with the finger: the hero shrinks a little and fades as the sheet
+   comes up, and its corners round off. A script on scroll runs a frame behind native scrolling, and rounding
+   the corners with border-radius repainted the whole hero every frame, which is what made it choppy. Page-coloured
+   corner pieces (.hero-edge) fade in instead. --handoff (set by script on resize) is the scroll distance
+   until the sheet reaches the top bar. Without scroll-driven animations the hero simply stays put under the sheet. */
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .touch .hero.stick {
+      animation: hero-recede linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0px var(--handoff, 100vh);
+    }
+    .touch .hero.stick .hero-edge { display: block; position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+    .touch .hero.stick .hero-edge::before,
+    .touch .hero.stick .hero-edge::after {
+      content: "";
+      position: absolute;
+      left: 0; right: 0;
+      height: 36px;
+      animation: hero-corners linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0px var(--handoff, 100vh);
+    }
+    .touch .hero.stick .hero-edge::before {   /* top corners */
+      top: 0;
+      background:
+        radial-gradient(circle at 100% 100%, transparent 35.5px, var(--bg) 36px) 0 0 / 36px 36px no-repeat,
+        radial-gradient(circle at 0 100%, transparent 35.5px, var(--bg) 36px) 100% 0 / 36px 36px no-repeat;
+    }
+    .touch .hero.stick .hero-edge::after {    /* bottom corners: they show beside the sheet, which is narrower than the screen */
+      bottom: 0;
+      background:
+        radial-gradient(circle at 100% 0, transparent 35.5px, var(--bg) 36px) 0 100% / 36px 36px no-repeat,
+        radial-gradient(circle at 0 0, transparent 35.5px, var(--bg) 36px) 100% 100% / 36px 36px no-repeat;
+    }
+  }
+}
+.hero-edge { display: none; }
+@keyframes hero-recede {
+  0% { transform: scale(1); opacity: 1; }
+  25% { opacity: 0.89; }
+  50% { opacity: 0.67; }
+  75% { opacity: 0.37; }
+  100% { transform: scale(0.92); opacity: 0; }
+}
+@keyframes hero-corners { 0% { opacity: 0; } 40%, 100% { opacity: 1; } }
 .hero.is-past .blob, .hero.is-past .hero-mascot-fig { animation-play-state: paused; }   /* nothing animates once the sheet covers it */
+.touch .hero.is-leaving .blob, .touch .hero.is-leaving .hero-mascot-fig { animation-play-state: paused; }   /* on phones, from the first scroll: less for the phone to draw while the sheet slides over */
 /* No demo ever shows a play button. Where the browser won't start a video by itself (Low Power Mode), the cover
    (the video's first frame) stays up, and Safari plays the same MP4 inside an <img> laid over it (.motion), which
    autoplay rules don't cover. Safari's own start button, drawn over a refused <video>, is hidden as well. */
@@ -2211,6 +2264,10 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
 }
 @keyframes crab-fa { 0%, 56% { opacity: 1; } 58% { opacity: 0; } 60% { opacity: 1; } 62% { opacity: 0; } 70% { opacity: 1; } 72% { opacity: 0; } 74%, 100% { opacity: 1; } }
 @keyframes crab-fb { 0%, 56% { opacity: 0; } 58% { opacity: 1; } 60% { opacity: 0; } 62% { opacity: 1; } 70% { opacity: 0; } 72% { opacity: 1; } 74%, 100% { opacity: 0; } }
+/* Off screen, nothing animates: the endless little loops in the phone section, "Why Bet" and the bands (pulses,
+   a spinner, blinks, the crab) pause while their section is out of view (.anim-off, set by script), so the phone
+   isn't redrawing what nobody can see while it scrolls. They start again just before they come back into view. */
+.anim-off, .anim-off *, .anim-off *::before, .anim-off *::after { animation-play-state: paused !important; }
 @keyframes crab-blink { 0%, 30% { opacity: 0; } 31% { opacity: 1; } 32.5%, 88% { opacity: 0; } 89% { opacity: 1; } 90.5%, 100% { opacity: 0; } }
 
 /* Copying the email address lets a few pixel hearts float up from the button */
@@ -2241,7 +2298,7 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
 @media (prefers-reduced-motion: no-preference) {
   .hero-bubbles { animation: fade-in 1.4s ease-out 0.4s backwards; }
   .hero-bubbles i { top: 100%; opacity: 0; animation: bubble-up var(--t) linear var(--d) infinite, bubble-sway 3.6s steps(1, end) var(--d) infinite; }
-  .hero.is-past .hero-bubbles i { animation-play-state: paused; }
+  .hero.is-past .hero-bubbles i, .touch .hero.is-leaving .hero-bubbles i { animation-play-state: paused; }
 }
 @keyframes bubble-up {
   0% { transform: translateY(0); opacity: 0; }
@@ -2276,6 +2333,7 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
   </div>
   <div class="hero-bubbles" aria-hidden="true"><i style="--x:5%;--s:3;--t:26s;--d:-4s;--o:0.75;--y:70%"></i><i class="sm" style="--x:12%;--s:2;--t:20s;--d:-13s;--o:0.7;--y:40%"></i><i style="--x:19%;--s:4;--t:32s;--d:-20s;--o:0.55;--y:18%"></i><i style="--x:28%;--s:2;--t:24s;--d:-9s;--o:0.5;--y:86%"></i><i class="sm" style="--x:41%;--s:2;--t:22s;--d:-17s;--o:0.4;--y:58%"></i><i class="sm" style="--x:62%;--s:3;--t:27s;--d:-6s;--o:0.4;--y:30%"></i><i style="--x:72%;--s:2;--t:21s;--d:-15s;--o:0.6;--y:80%"></i><i style="--x:81%;--s:4;--t:30s;--d:-2s;--o:0.55;--y:48%"></i><i class="sm" style="--x:89%;--s:2;--t:19s;--d:-11s;--o:0.7;--y:22%"></i><i style="--x:95%;--s:3;--t:25s;--d:-22s;--o:0.75;--y:66%"></i></div>
   <div class="hero-veil" aria-hidden="true"></div>
+  <span class="hero-edge" aria-hidden="true"></span>
   <div class="hero-content">
     <div class="hero-mascot" aria-hidden="true">
       <div class="hero-mascot-fig"><svg class="bet bet-big" viewBox="0 0 16 14" shape-rendering="crispEdges" aria-hidden="true"><g class="bet-body"><rect x="4" y="0" width="8" height="1" fill="#845eee"/><rect x="2" y="1" width="12" height="1" fill="#845eee"/><rect x="1" y="2" width="2" height="1" fill="#845eee"/><rect x="3" y="2" width="2" height="1" fill="#c6b7fa"/><rect x="5" y="2" width="9" height="1" fill="#845eee"/><rect x="14" y="2" width="1" height="1" fill="#6441ce"/><rect x="1" y="3" width="1" height="1" fill="#845eee"/><rect x="2" y="3" width="1" height="1" fill="#c6b7fa"/><rect x="3" y="3" width="11" height="1" fill="#845eee"/><rect x="14" y="3" width="1" height="1" fill="#6441ce"/><rect x="0" y="4" width="2" height="1" fill="#845eee"/><rect x="2" y="4" width="1" height="1" fill="#c6b7fa"/><rect x="3" y="4" width="11" height="1" fill="#845eee"/><rect x="14" y="4" width="2" height="1" fill="#6441ce"/><rect x="0" y="5" width="14" height="1" fill="#845eee"/><rect x="14" y="5" width="2" height="1" fill="#6441ce"/><rect x="0" y="6" width="14" height="1" fill="#845eee"/><rect x="14" y="6" width="2" height="1" fill="#6441ce"/><rect x="0" y="7" width="14" height="1" fill="#845eee"/><rect x="14" y="7" width="2" height="1" fill="#6441ce"/><rect x="0" y="8" width="2" height="1" fill="#845eee"/><rect x="2" y="8" width="2" height="1" fill="#e89fc4"/><rect x="4" y="8" width="8" height="1" fill="#845eee"/><rect x="12" y="8" width="2" height="1" fill="#e89fc4"/><rect x="14" y="8" width="2" height="1" fill="#6441ce"/><rect x="1" y="9" width="12" height="1" fill="#845eee"/><rect x="13" y="9" width="2" height="1" fill="#6441ce"/><rect x="2" y="10" width="10" height="1" fill="#845eee"/><rect x="12" y="10" width="2" height="1" fill="#6441ce"/><rect x="1" y="11" width="2" height="1" fill="#845eee"/><rect x="4" y="11" width="2" height="1" fill="#845eee"/><rect x="7" y="11" width="2" height="1" fill="#845eee"/><rect x="10" y="11" width="2" height="1" fill="#845eee"/><rect x="13" y="11" width="2" height="1" fill="#6441ce"/><g class="eyes-open"><rect x="4" y="6" width="1" height="1" fill="#ffffff"/><rect x="5" y="6" width="1" height="1" fill="#1c1431"/><rect x="10" y="6" width="1" height="1" fill="#ffffff"/><rect x="11" y="6" width="1" height="1" fill="#1c1431"/><rect x="4" y="7" width="2" height="1" fill="#1c1431"/><rect x="10" y="7" width="2" height="1" fill="#1c1431"/></g><g class="eyes-shut"><rect x="4" y="7" width="2" height="1" fill="#1c1431"/><rect x="10" y="7" width="2" height="1" fill="#1c1431"/></g><g class="legs-a"><rect x="1" y="12" width="1" height="1" fill="#845eee"/><rect x="4" y="12" width="1" height="1" fill="#845eee"/><rect x="7" y="12" width="2" height="1" fill="#845eee"/><rect x="11" y="12" width="1" height="1" fill="#845eee"/><rect x="14" y="12" width="1" height="1" fill="#6441ce"/><rect x="0" y="13" width="2" height="1" fill="#845eee"/><rect x="3" y="13" width="2" height="1" fill="#845eee"/><rect x="7" y="13" width="2" height="1" fill="#845eee"/><rect x="11" y="13" width="2" height="1" fill="#845eee"/><rect x="14" y="13" width="2" height="1" fill="#6441ce"/></g><g class="legs-b"><rect x="2" y="12" width="1" height="1" fill="#845eee"/><rect x="5" y="12" width="1" height="1" fill="#845eee"/><rect x="7" y="12" width="2" height="1" fill="#845eee"/><rect x="10" y="12" width="1" height="1" fill="#845eee"/><rect x="13" y="12" width="1" height="1" fill="#6441ce"/><rect x="1" y="13" width="2" height="1" fill="#845eee"/><rect x="4" y="13" width="2" height="1" fill="#845eee"/><rect x="7" y="13" width="2" height="1" fill="#845eee"/><rect x="10" y="13" width="2" height="1" fill="#845eee"/><rect x="13" y="13" width="2" height="1" fill="#6441ce"/></g></g></svg></div>
@@ -2725,6 +2783,11 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
     if (!v || v.hidden) return;
     var k = clipOf(v);
     if (k) {
+      if (k.parkT) {   // back before the cover was fully up: start over, keeping what has loaded
+        clearTimeout(k.parkT);
+        k.parkT = 0;
+        if (v.getAttribute('src')) { try { v.currentTime = 0; } catch (e) {} }
+      }
       k.away = false;
       k.want = true;
       feed(k, 'auto');
@@ -2770,7 +2833,7 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
     return true;
   }
   // Off the active card: pause, and if it's still downloading, stop that, so the active video has the
-  // connection to itself. Its last frame stays up as a still and it carries on from there next time.
+  // connection to itself.
   function park(k) {
     if (!k) return;
     var v = k.v;
@@ -2784,6 +2847,14 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
     k.live = false;   // so the cover fades again once the replay's first frame is up
     if (k.still) k.still.hidden = true;
     k.p.classList.remove('is-shown');
+    // The cover fades back in over the paused frame; only once it is fully up is the video rewound (and a
+    // download cut off, which empties it). Doing that at once showed the dark, empty player through the
+    // fading cover: a flicker on every demo passed in a quick scroll on a phone.
+    clearTimeout(k.parkT);
+    k.parkT = setTimeout(function () { k.parkT = 0; if (!onCard(k)) rewind(k); }, 300);
+  }
+  function rewind(k) {
+    var v = k.v;
     if (v.getAttribute('src')) { try { v.currentTime = 0; } catch (e) {} }
     if (k === warmClip || v.hidden || !v.getAttribute('src') || loadedAll(v) || v.networkState !== 2) return;   // what it has already loaded, it keeps
     k.gen++;   // any paint watch belongs to the old download
@@ -2819,7 +2890,7 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
     var v = p.querySelector('video');
     var ph = p.querySelector('.placeholder');
     if (!v) return;
-    var k = { p: p, v: v, files: null, src: null, at: 0, from: 0, gen: 0, live: false, played: false, want: false, away: false, still: null, waitT: 0 };
+    var k = { p: p, v: v, files: null, src: null, at: 0, from: 0, gen: 0, live: false, played: false, want: false, away: false, still: null, waitT: 0, parkT: 0 };
     clips.push(k);
     function missing() {   // no copy of it would load: the cover stays (the "coming soon" panel is for a player without one)
       v.hidden = true;
@@ -3123,6 +3194,10 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
       else iio.observe(el);
     });
   } else aps.forEach(function (el) { el.classList.add('in'); });
+  document.addEventListener('transitionend', function (e) {   // risen: see .ap-done
+    var el = e.target;
+    if (e.propertyName === 'transform' && el.classList && el.classList.contains('ap') && el.classList.contains('in')) el.classList.add('ap-done');
+  });
 
   // The feature strip only moves while it's on screen.
   var fcTrack = document.querySelector('.fc-track');
@@ -3143,7 +3218,8 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
     if (p >= 1) { hero.style.visibility = 'hidden'; hero.classList.add('is-past'); return; }
     hero.style.visibility = '';
     hero.classList.remove('is-past');
-    var lag = touch ? 0 : y * (wide.matches ? 0.5 : 0.2);   // touch: the hero is sticky and scrolls natively
+    if (touch) { hero.classList.toggle('is-leaving', p > 0.02); return; }   // touch: CSS runs the hand-off (.touch .hero.stick)
+    var lag = y * (wide.matches ? 0.5 : 0.2);
     hero.style.transform = 'translate3d(0,' + lag.toFixed(1) + 'px,0) scale(' + (1 - p * 0.08).toFixed(4) + ')';
     hero.style.opacity = (1 - Math.pow(p, 1.6)).toFixed(3);
     hero.style.setProperty('--hp', Math.min(1, p * 2.5).toFixed(3));   // corners round off as it recedes
@@ -3471,16 +3547,31 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
     return best;
   }
 
+  // A demo takes over only once the page is moving slowly (under about 500px a second) and it has been the
+  // one most in view for a moment. A quick scroll past the demos then leaves them on their covers and starts
+  // only the one you come to rest on, instead of starting and stopping every video on the way, which flickered.
+  var cand = null, candT = 0, settleT = 0, lastY = 0, lastT = 0, speed = 0;
+  function settle(best) {
+    clearTimeout(settleT);
+    if (!best || best === current) { cand = null; return; }
+    var now = Date.now();
+    if (best !== cand) { cand = best; candT = now; }
+    if (speed < 0.5 && now - candT >= 150) { cand = null; focus(best); return; }
+    settleT = setTimeout(update, 160);   // look again, in case the scroll slows or stops here
+  }
+
   // Native scrolling. Once per frame: hero and top bar effects, then pick the active demo.
   var queued = false;
   function update() {
     queued = false;
-    var y = window.scrollY || 0;
+    var y = window.scrollY || 0, now = Date.now(), dt = now - lastT;
+    speed = dt > 0 && dt < 200 ? Math.abs(y - lastY) / dt : 0;   // px per ms
+    lastY = y;
+    lastT = now;
     heroFx(y);
     navFx(y);
     spy();
-    var best = pick();
-    if (best) focus(best);
+    settle(pick());
   }
   window.addEventListener('scroll', function () {
     if (!queued) { queued = true; requestAnimationFrame(update); }
@@ -3493,6 +3584,7 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
   var introTitle = document.querySelector('.intro-title');
   function layout() {
     if (demos) handoff = Math.max(1, demos.getBoundingClientRect().top + window.scrollY - 92);
+    if (hero) hero.style.setProperty('--handoff', Math.round(handoff) + 'px');
     if (touch && hero) hero.classList.toggle('stick', hero.offsetHeight <= window.innerHeight + 1);   // a hero taller than the screen (landscape) scrolls as usual
     heroFx(window.scrollY || 0);
     spy(true);
@@ -4322,6 +4414,16 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
       setTimeout(function () { h.remove(); }, 1300 + i * 80);
     });
   }
+})();
+</script>
+<script>
+// Off screen, nothing animates (see .anim-off).
+(function () {
+  if (!('IntersectionObserver' in window)) return;
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) { en.target.classList.toggle('anim-off', !en.isIntersecting); });
+  }, { rootMargin: '15% 0px' });
+  Array.prototype.forEach.call(document.querySelectorAll('.pocket, .accel, .px-band'), function (el) { io.observe(el); });
 })();
 </script>
 </body>
