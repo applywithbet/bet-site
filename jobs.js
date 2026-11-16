@@ -89,7 +89,10 @@ window.BET_JOBS = {
         `Work with our SDR on target lists and outbound messaging`,
         `Set up pilots with career centers and turn them into paid contracts`,
         `Figure out pricing and packaging for schools and programs`,
-        `Write down what works so someone else can repeat it`
+        `Write down what works so someone else can repeat it`,
+        `Run social media and PR for the schools side. Every signed school gets a LinkedIn post that sounds like a person wrote it`,
+        `Split office octopus feeding duty with the B2C lead. It eats before everyone`,
+        `Get Bet on a billboard in Times Square, then send the photo to every dean who left you on read`
       ],
       want: [
         `1–2 years closing B2B deals, as an AE or in a mixed SDR and AE role`,
@@ -107,7 +110,7 @@ window.BET_JOBS = {
       team: 'go-to-market',
       title: 'GTM Lead, B2C',
       blurb: `Get Bet in front of every job seeker in America. 1–2 years in growth. Built different.`,
-      pay: '$130K – $180K',
+      pay: '$140K – $190K',
       commission: true,
       about: `This is the consumer side. Every week a lot of people start looking for a new job, and we want Bet to be the first thing they hear about. You'll own how we reach them: content, creators, campus, referrals, paid, whatever works. There's a budget and a lot of room to try things.`,
       doing: [
@@ -115,7 +118,10 @@ window.BET_JOBS = {
         `Find and work with creators who talk about jobs and careers`,
         `Build a referral loop so users bring their friends`,
         `Track what each channel costs and what it brings in, and cut what isn't working`,
-        `Work with design on landing pages and launches`
+        `Work with design on landing pages and launches`,
+        `Run our social media and PR. If Bet goes viral, that's on you. If it goes viral for the wrong reason, also on you`,
+        `Go buy an octopus for the office and keep it fed. It's the mascot now, so it has to look good on camera`,
+        `Put Bet ads up in Times Square and get as many people as possible to post a photo with one`
       ],
       want: [
         `1–2 years in growth or marketing at a consumer company`,
@@ -158,7 +164,7 @@ window.BET_JOBS = {
       team: 'engineering',
       title: 'Backend Engineer',
       blurb: `Scrapers, queues and a job index that refreshes every hour. 1–2 years shipping Python or Go. Deploys on Fridays, no fear.`,
-      pay: '$170K – $230K',
+      pay: '$180K – $260K',
       about: `Bet pulls in new jobs every hour and matches them to each person's profile. Behind that are scrapers, queues, a search index and a lot of data cleanup. You'll own big pieces of it. The system is young, so you'll make real calls about how it's built.`,
       doing: [
         `Build and run the pipeline that collects, cleans and dedupes job postings`,
@@ -183,7 +189,7 @@ window.BET_JOBS = {
       team: 'engineering',
       title: 'Software Engineer',
       blurb: `The dashboard, the autofill, the tracker. 1–2 years of TypeScript and opinions you can defend.`,
-      pay: '$160K – $220K',
+      pay: '$180K – $260K',
       about: `This role is mostly the parts of Bet people see: the dashboard, the autofill extension and the tracker. You'll ship features end to end and talk to the people using them. We want engineers who care how something feels, not only whether it works.`,
       doing: [
         `Build features from first sketch to release`,

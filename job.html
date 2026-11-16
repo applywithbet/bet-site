@@ -460,19 +460,24 @@ textarea.f-input { min-height: 120px; resize: vertical; line-height: 1.55; }
 @keyframes legs-alt { 0% { opacity: 0; } 50% { opacity: 1; } }
 .bubble {
   position: relative;
+  isolation: isolate;
   background: var(--tint);
   border-radius: 24px;
   padding: 8px 18px;
 }
-.bubble::before {
+.bubble::before {               /* the tail: a square turned on its corner, its tip rounded, tucked into the round end
+                                   so it joins cleanly (a border triangle left notches where it met the curve) */
   content: "";
   position: absolute;
-  left: -9px;
+  z-index: -1;                   /* over the bubble's fill, under its text */
+  left: -3.5px;
   top: 50%;
-  margin-top: -9px;
-  border-width: 9px 10px 9px 0;
-  border-style: solid;
-  border-color: transparent var(--tint) transparent transparent;
+  width: 16px;
+  height: 16px;
+  margin-top: -8px;
+  background: inherit;
+  border-bottom-left-radius: 2.5px;
+  transform: rotate(45deg);
 }
 .bubble p { margin: 0; font-family: var(--font-display); font-weight: var(--title-weight); font-size: 1.4rem; line-height: 1.2; letter-spacing: -0.01em; }
 .jp-done { display: grid; justify-items: start; gap: 16px; padding: 4px 0 8px; }

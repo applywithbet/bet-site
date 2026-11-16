@@ -167,20 +167,25 @@ body {
 .still .eyes-shut, .still .legs-b { animation: none; opacity: 0; }
 .bubble {
   position: relative;
+  isolation: isolate;
   background: var(--surface);
   border-radius: 24px;
   filter: drop-shadow(0 1px 1.5px rgb(0 0 0 / 0.12));
   padding: 8px 18px;
 }
-.bubble::before {
+.bubble::before {               /* the tail: a square turned on its corner, its tip rounded, tucked into the round end
+                                   so it joins cleanly (a border triangle left notches where it met the curve) */
   content: "";
   position: absolute;
-  left: -9px;
+  z-index: -1;                   /* over the bubble's fill, under its text */
+  left: -3.5px;
   top: 50%;
-  margin-top: -9px;
-  border-width: 9px 10px 9px 0;
-  border-style: solid;
-  border-color: transparent var(--surface) transparent transparent;
+  width: 16px;
+  height: 16px;
+  margin-top: -8px;
+  background: inherit;
+  border-bottom-left-radius: 2.5px;
+  transform: rotate(45deg);
 }
 .signoff-text {
   margin: 0;
@@ -465,7 +470,12 @@ html:not(.js) .theme-toggle { display: none; }
   text-wrap: balance;
 }
 .sf-tagline .hl { display: block; color: var(--primary); }
-.sf-cols { display: flex; align-items: flex-start; gap: 48px; }
+.sf-cols {                     /* three link columns, evenly spaced (160px apart); the last ends at the footer's right edge */
+  display: grid;
+  grid-template-columns: repeat(2, minmax(max-content, 112px)) max-content;
+  gap: 48px;
+  align-items: start;
+}
 .sf-col { flex: none; display: grid; gap: 14px; align-content: start; justify-items: start; }
 .sf-col-title { margin: 0; font-family: var(--font-display); font-weight: 500; font-size: 0.82rem; color: var(--ink); }
 .sf-col a { color: var(--muted); text-decoration: none; font-size: 0.95rem; line-height: 1.4; transition: color 0.2s ease; }
@@ -505,6 +515,10 @@ html:not(.js) .theme-toggle { display: none; }
 @media (max-width: 960px) {
   .sf-top { gap: 32px; padding: 72px 0 56px; }
   .sf-cols { gap: 32px; }
+}
+@media (max-width: 760px) {    /* the tagline on top, then the three columns side by side across the full width */
+  .sf-top { flex-direction: column; gap: 36px; padding: 56px 0 48px; }
+  .sf-cols { width: 100%; grid-template-columns: repeat(3, minmax(max-content, 1fr)); gap: 20px; }   /* equal, but never narrower than a link */
 }
 
 /* Enter from below, once: the intro column (with a small scale-up) and each section */
@@ -573,10 +587,10 @@ html:not(.js) .theme-toggle { display: none; }
 }
 @media (max-width: 600px) {
   .wrap { gap: 18px; padding: 0 14px 32px; }
-  .sf-top { flex-direction: column; gap: 28px; padding: 48px 0 40px; }
-  .sf-cols { width: 100%; flex-wrap: wrap; }
-  .sf-col { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 22px; }
-  .sf-col-title { flex-basis: 100%; }
+  .sf-top { gap: 28px; padding: 48px 0 40px; }
+  .sf-cols { gap: 16px; }
+  .sf-col { gap: 12px; }
+  .sf-col a { padding-block: 2px; }   /* a little more to tap */
   .sf-bottom { flex-wrap: wrap; gap: 6px 16px; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -723,15 +737,16 @@ html.lenis, html.lenis body { height: auto; }
       <div class="sf-cols">
         <div class="sf-col" data-reveal style="--d:0.08s">
           <p class="sf-col-title">Product</p>
-          <a href="index.html#first-screen">Start</a>
           <a href="index.html#dashboard">Dashboard</a>
           <a href="index.html#autofill">Autofill</a>
           <a href="index.html#tracker">Tracker</a>
+          <a href="index.html#phone">Mobile app</a>
         </div>
         <div class="sf-col" data-reveal style="--d:0.14s">
           <p class="sf-col-title">Company</p>
           <a href="careers.html">Careers</a>
           <a href="index.html#contact">Contact</a>
+          <a href="demo.html">Book a demo</a>
         </div>
         <div class="sf-col" data-reveal style="--d:0.2s">
           <p class="sf-col-title">Legal</p>

@@ -237,6 +237,46 @@ body {
   margin-right: calc((100cqw - min(100cqw, 940px)) / 2 + (min(100cqw, 940px) - 48px) / 8 - 64px);
 }
 @media (max-width: 960px) { .contact-spot { display: none; } }   /* columns stack: no empty space to fill */
+/* Bet's line in the contact panel: a white speech bubble to its left in the type of the "bet." bubble, with
+   the tail pointing at Bet. When Bet travels it pops out once Bet has landed (.is-here, set by the script). */
+.contact-spot { position: relative; }
+.contact-say {
+  position: absolute;
+  top: 40%;
+  right: calc(100% + 12px);
+  translate: 0 -50%;
+  padding: 8px 18px;
+  border-radius: 24px;
+  background: #fff;
+  color: #1f1f1f;
+  font-family: var(--font-display);
+  font-weight: var(--title-weight);
+  font-size: 1.2rem;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  filter: drop-shadow(0 1px 1.5px rgb(0 0 0 / 0.14)) drop-shadow(0 6px 14px rgb(20 18 60 / 0.1));   /* outlines it on the white panel in light mode, tail included */
+  transform-origin: 100% 50%;
+}
+.contact-say::after {             /* the tail: a square turned on its corner, its tip rounded, tucked far enough into
+                                    the round end that its top and bottom corners stay inside (a border triangle left notches) */
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -4.5px;
+  width: 18px;
+  height: 18px;
+  margin-top: -9px;
+  background: #fff;
+  border-top-right-radius: 3px;
+  transform: rotate(45deg);
+}
+.travel .contact-say { opacity: 0; scale: 0.6; transition: opacity 0.18s ease, scale 0.18s ease; }
+.travel .contact-spot.is-here .contact-say {
+  opacity: 1;
+  scale: 1;
+  transition: opacity 0.25s ease 0.06s, scale 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) 0.06s;
+}
 .travel .signoff .bet { visibility: hidden; }
 .brand .bet.absorb { animation: absorb 0.45s cubic-bezier(0.34, 1.56, 0.64, 1); transform-origin: 50% 60%; }   /* takes the traveller in */
 @keyframes absorb { 0% { transform: none; } 40% { transform: scale(1.14); } 100% { transform: none; } }
@@ -327,20 +367,25 @@ body {
 
 .bubble {
   position: relative;
+  isolation: isolate;
   background: var(--surface);
   border-radius: 24px;
   filter: drop-shadow(0 1px 1.5px rgb(0 0 0 / 0.12));
   padding: 8px 18px;
 }
-.bubble::before {
+.bubble::before {               /* the tail: a square turned on its corner, its tip rounded, tucked into the round end
+                                   so it joins cleanly (a border triangle left notches where it met the curve) */
   content: "";
   position: absolute;
-  left: -9px;
+  z-index: -1;                   /* over the bubble's fill, under its text */
+  left: -3.5px;
   top: 50%;
-  margin-top: -9px;
-  border-width: 9px 10px 9px 0;
-  border-style: solid;
-  border-color: transparent var(--surface) transparent transparent;
+  width: 16px;
+  height: 16px;
+  margin-top: -8px;
+  background: inherit;
+  border-bottom-left-radius: 2.5px;
+  transform: rotate(45deg);
 }
 h1 {
   margin: 0;
@@ -1277,11 +1322,16 @@ html.lenis, html.lenis body { height: auto; }
   text-wrap: balance;
 }
 .sf-tagline .hl { display: block; color: var(--primary); }   /* its own line, as in the bento headline */
-.sf-cols { display: flex; align-items: flex-start; gap: 48px; }
+.sf-cols {                     /* three link columns, evenly spaced (160px apart); the last ends at the footer's right edge */
+  display: grid;
+  grid-template-columns: repeat(2, minmax(max-content, 112px)) max-content;
+  gap: 48px;
+  align-items: start;
+}
 .sf-col { flex: none; display: grid; gap: 14px; align-content: start; justify-items: start; }   /* only as wide as its longest link, so the column ends at the footer's right edge */
 .sf-col-title { margin: 0; font-family: var(--font-display); font-weight: 500; font-size: 0.82rem; color: var(--ink); }
 .sf-col a { color: var(--muted); text-decoration: none; font-size: 0.95rem; line-height: 1.4; transition: color 0.2s ease; }
-.sf-col a:hover { color: var(--ink); }
+.sf-col a:hover, .sf-col a[aria-current] { color: var(--ink); }
 .sf-col a:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; border-radius: 4px; }
 .sf-mark {                     /* the wordmark band: the octopus and "bet", both under the same fade */
   display: flex;
@@ -1317,6 +1367,10 @@ html.lenis, html.lenis body { height: auto; }
 @media (max-width: 960px) {
   .sf-top { gap: 32px; padding: 72px 0 56px; }
   .sf-cols { gap: 32px; }
+}
+@media (max-width: 760px) {    /* the tagline on top, then the three columns side by side across the full width */
+  .sf-top { flex-direction: column; gap: 36px; padding: 56px 0 48px; }
+  .sf-cols { width: 100%; grid-template-columns: repeat(3, minmax(max-content, 1fr)); gap: 20px; }   /* equal, but never narrower than a link */
 }
 
 /* Enter from below, once: the intro column (with a small scale-up) and each demo card */
@@ -1428,10 +1482,10 @@ html.lenis, html.lenis body { height: auto; }
   .inbox-text { font-size: min(1rem, 4.4vw); }
   .inbox-icon { width: 40px; height: 40px; }
   .foot-logos { gap: 20px; }
-  .sf-top { flex-direction: column; gap: 28px; padding: 48px 0 40px; }
-  .sf-cols { width: 100%; flex-wrap: wrap; }   /* Product and Company stack when they can't share a row */
-  .sf-col { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 22px; }   /* the links in one row under their title */
-  .sf-col-title { flex-basis: 100%; }
+  .sf-top { gap: 28px; padding: 48px 0 40px; }
+  .sf-cols { gap: 16px; }
+  .sf-col { gap: 12px; }
+  .sf-col a { padding-block: 2px; }   /* a little more to tap */
   .sf-bottom { flex-wrap: wrap; gap: 6px 16px; }   /* stays one row (copyright left, slogan right) unless the screen is very narrow */
   .foot-logos .lg-grid { --lg-scale: 0.72; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 56px; }
   .lg-wait.is-in .lg-grid li { transition-delay: calc(0.1s + var(--wp) * 50ms); }
@@ -1530,7 +1584,7 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
   --ph-h: calc(904px * var(--ph-s));
   --panel-h: calc(var(--ph-h) + 2 * var(--pp));
   --ph-top: max(92px, calc((100svh - var(--panel-h)) / 2));   /* pinned: centred, never under the top bar */
-  --step-h: 350px;
+  --hold: 58vh;                                 /* how much scrolling each demo gets */
   --head-h: 64px;                               /* the heading's height (set by the script) */
   margin-inline: calc((100% - min(1240px, 100vw - 40px)) / 2);   /* the demos sheet's band */
   padding: clamp(32px, 6vh, 72px) clamp(0px, 4vw, 50px) clamp(16px, 3vh, 40px);
@@ -1552,23 +1606,22 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
 .pk-steps {
   list-style: none;
   margin: 0;
-  /* the first step centres on the phone when it pins, and so does the last as the section ends */
-  padding: max(0px, calc((var(--panel-h) - var(--step-h)) / 2 - var(--head-h))) 0 calc((var(--panel-h) - var(--step-h)) / 2);
+  /* the first step's text starts centred on the phone as it pins; the last leaves with the phone */
+  padding: max(0px, calc(var(--panel-h) / 2 - var(--head-h) - var(--half1, 90px))) 0 max(0px, calc(var(--panel-h) / 2 - 80px));
 }
+/* Each step is a longer stretch of ordinary scrolling: its text pins beside the phone, centred on it, while
+   --hold more of the page goes by (the phone plays that demo meanwhile), then the next step slides up. */
 .pk-step {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 16px;
-  min-height: var(--step-h);
-  padding-block: 24px;
-  border-bottom: 1.5px solid transparent;    /* the line between steps: clear at both ends, full by 10%, like every divider */
-  border-image: linear-gradient(90deg, transparent, color-mix(in srgb, var(--ink) 8%, transparent) 10%, color-mix(in srgb, var(--ink) 8%, transparent) 90%, transparent) 1;
+  position: relative;
   opacity: 0.3;
   transition: opacity 0.35s cubic-bezier(0.44, 0, 0.56, 1);
 }
-.pk-step:last-child { border-bottom: 0; }
+.pk-step::after { content: ""; display: block; height: var(--hold); }   /* the stretch is content, not padding: pinned text only travels within its step's content box */
+.pk-step:last-child::after { height: calc(var(--hold) * 0.7); }
 .pk-step.is-on { opacity: 1; }
+/* Centred on the phone by its own measured height (--half, set by the script), not by shifting it up: a shift
+   lets a taller next step ride up into the one before. The padding keeps a clear gap as one hands over to the next. */
+.pk-step-in { position: sticky; top: calc(var(--ph-top) + var(--panel-h) / 2 - var(--half, 90px)); display: grid; gap: 16px; padding-block: 28px; }
 .pk-step h3 {
   margin: 0;
   font-family: var(--font-display);
@@ -1831,6 +1884,7 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
 .ph-search svg { width: 24px; height: 24px; }
 
 /* Touches, so the gestures read */
+.ph-cut { position: absolute; inset: 0; z-index: 39; background: var(--bg); opacity: 0; pointer-events: none; }   /* the dip between demos */
 .ph-touch { position: absolute; z-index: 50; left: 0; top: 0; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%; background: rgb(255 255 255 / 0.5); box-shadow: 0 0 0 1px rgb(0 0 0 / 0.14), 0 4px 16px rgb(0 0 0 / 0.2); opacity: 0; pointer-events: none; will-change: transform, opacity; }
 
 /* After applying, the Dynamic Island opens into a live alert, as iOS does, then closes again */
@@ -1958,19 +2012,18 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
   .ph-row-t span.now::before { animation: none; }
 }
 @media (min-width: 768px) and (max-width: 1199px) {
-  .pocket { --step-h: 300px; }
+  .pocket { --hold: 52vh; }
   .pocket-story { gap: 28px; }
   .pocket-stage { flex-basis: 50%; }
   .pocket-text { flex-basis: 44%; }
   .pocket-h { font-size: 1.75rem; }   /* as the demos heading at this width */
-  .pk-step { gap: 12px; }
+  .pk-step-in { gap: 12px; }
   .pk-step p { font-size: 1rem; }
 }
 @media (max-width: 767px) {
   .pocket {
     --pp: 14px;
     --ph-top: 76px;
-    --step-h: max(170px, calc(100svh - 76px - var(--panel-h) - 40px));   /* what's left under the pinned phone */
     padding: 36px 16px 8px;
   }
   .pocket-story { flex-direction: column; align-items: stretch; gap: 0; }
@@ -1987,13 +2040,20 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
   .pocket-stage::after { content: ""; position: absolute; left: 0; right: 0; top: 100%; height: 36px; background: linear-gradient(var(--bg), transparent); pointer-events: none; }
   .phone-panel { border-radius: 20px; }   /* the tiles' phone radius */
   .pk-steps { padding: 0; }
-  .pk-step { gap: 10px; padding-block: 22px; }
+  .pk-step-in { gap: 10px; }
   .pk-step h3 { font-size: 1.45rem; }
   .pk-step p { font-size: 0.98rem; line-height: 1.5; }
+}
+@media (max-width: 767px) and (min-height: 561px) {
+  /* the text pins just under the phone instead of beside it */
+  .pocket { --hold: 60svh; }
+  .pk-step-in { top: calc(var(--ph-top) + var(--panel-h) + 12px + 22px); padding-block: 0 28px; }
 }
 @media (max-width: 767px) and (max-height: 560px) {   /* a phone on its side: nothing pins, the iPhone sits above the steps */
   .pocket-stage { position: static; padding-bottom: 28px; }
   .pocket-stage::before, .pocket-stage::after { display: none; }
+  .pk-step::after, .pk-step:last-child::after { height: 28px; }   /* nothing pins: a plain list */
+  .pk-step-in { position: static; padding-block: 0; }
 }
 </style>
 </head>
@@ -2190,20 +2250,28 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
         <h2 class="pocket-h" data-reveal>Doom scroll <em>for jobs</em></h2>
         <ol class="pk-steps" role="list" data-reveal style="--d:0.08s">
           <li class="pk-step is-on" data-step="scroll">
-            <h3>Scroll through jobs picked for you</h3>
-            <p>A feed of openings matched to your resume, one job per screen. New ones every hour.</p>
+            <div class="pk-step-in">
+              <h3>Scroll through jobs picked for you</h3>
+              <p>A feed of openings matched to your resume, one job per screen. New ones every hour.</p>
+            </div>
           </li>
           <li class="pk-step" data-step="pass">
-            <h3>Swipe left to pass</h3>
-            <p>Not interested? Swipe left and it’s gone. The next job is already there.</p>
+            <div class="pk-step-in">
+              <h3>Swipe left to pass</h3>
+              <p>Not interested? Swipe left and it’s gone. The next job is already there.</p>
+            </div>
           </li>
           <li class="pk-step" data-step="apply">
-            <h3>Swipe right and Bet fills it in</h3>
-            <p>Bet opens the real application, on Ashby, Greenhouse or Workday, and fills it in from your resume. You check it and tap submit.</p>
+            <div class="pk-step-in">
+              <h3>Swipe right and Bet fills it in</h3>
+              <p>Bet opens the real application, on Ashby, Greenhouse or Workday, and fills it in from your resume. You check it and tap submit.</p>
+            </div>
           </li>
           <li class="pk-step" data-step="track">
-            <h3>Every application, tracked</h3>
-            <p>Each one lands in your tracker with its status and your next interview, so nothing slips.</p>
+            <div class="pk-step-in">
+              <h3>Every application, tracked</h3>
+              <p>Each one lands in your tracker with its status and your next interview, so nothing slips.</p>
+            </div>
           </li>
         </ol>
       </div>
@@ -2279,7 +2347,7 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
             <span class="inbox-live" role="status"></span>
           </div>
         </div>
-        <span class="bet-spot contact-spot" aria-hidden="true"></span>
+        <span class="bet-spot contact-spot" aria-hidden="true"><span class="contact-say">Would love to chat</span></span>
       </div>
       <div class="foot-row foot-logos" id="built-by">
         <p class="contact-label logos-label" id="built-by-label" data-reveal>Built by professionals from</p>
@@ -2314,14 +2382,16 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
       <div class="sf-cols">
         <div class="sf-col" data-reveal style="--d:0.08s">
           <p class="sf-col-title">Product</p>
-          <a href="#first-screen">Start</a>
           <a href="#dashboard">Dashboard</a>
           <a href="#autofill">Autofill</a>
           <a href="#tracker">Tracker</a>
+          <a href="#phone">Mobile app</a>
         </div>
         <div class="sf-col" data-reveal style="--d:0.14s">
           <p class="sf-col-title">Company</p>
           <a href="careers.html">Careers</a>
+          <a href="#contact">Contact</a>
+          <a href="demo.html">Book a demo</a>
         </div>
         <div class="sf-col" data-reveal style="--d:0.2s">
           <p class="sf-col-title">Legal</p>
@@ -2852,6 +2922,8 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
       // (and, scrolling back up, comes out of it the same way).
       if (key === 'nav') ot = Math.min(ot, Math.max(0, (dist - 8) / 90));
       if (!landed && dist < 10) { landed = true; if (key === 'nav') absorb(); }
+      var here = key === 'contact' && landed;                          // Bet's bubble in the contact panel shows once it has landed there
+      if (drawn.here !== here) { drawn.here = here; if (spot.contact) spot.contact.classList.toggle('is-here', here); }
       if (dt > 0) { var es = 1 - Math.exp(-dt * 10); bw += (wt - bw) * es; bo += (ot - bo) * es; }
       bx = tp.x + cx + ex; by = tp.y + cy + ey;
       var moving = dist > 6 || Math.abs(vx) + Math.abs(vy) > 40;
@@ -3145,7 +3217,7 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
     '</div>' +
     '<div class="ph-sheet aw">' + sheetHTML + '</div>' +
     '<div class="ph-toast"><div class="ph-toast-c">' + logo('linear') + '<span class="ph-toast-t"><b>Applied to Linear</b><span>Software Engineer, Product · in your tracker</span></span><i>' + TICK + '</i></div></div>' +
-    '<div class="ph-touch"></div><div class="ph-island"></div><div class="ph-homebar"></div>' +
+    '<div class="ph-cut"></div><div class="ph-touch"></div><div class="ph-island"></div><div class="ph-homebar"></div>' +
   '</div>';
 
   var app = screen.firstChild;
@@ -3154,7 +3226,7 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
   var rvPass = q('.ph-rv-pass'), rvApply = q('.ph-rv-apply'), lens = q('.ph-lens'), tabEls = app.querySelectorAll('.ph-tab');
   var sheet = q('.ph-sheet'), load = q('.aw-load'), view = q('.aw-view'), page = q('.aw-page'), submit = q('.aw-submit'), done = q('.aw-done');
   var bet = q('.aw-bet'), betT = bet.querySelector('.aw-bet-t b'), betS = bet.querySelector('.aw-bet-t span'), betBar = bet.querySelector('.bar');
-  var toast = q('.ph-toast'), toastC = q('.ph-toast-c'), touch = q('.ph-touch'), row0 = q('.ph-row');
+  var toast = q('.ph-toast'), toastC = q('.ph-toast-c'), touch = q('.ph-touch'), row0 = q('.ph-row'), cut = q('.ph-cut');
   var cardEls = JOBS.map(function (j) { var d = document.createElement('div'); d.innerHTML = cardHTML(j); return d.firstChild; });
   var fields = Array.prototype.map.call(app.querySelectorAll('.aw-field'), function (el, i) {
     var f = FIELDS[i], inp = el.querySelector('.aw-in');
@@ -3467,21 +3539,30 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
 
   var active = steps.length ? steps[0].getAttribute('data-step') : null;
   var live = false;
-  function play() {
+  function resetAll() { resetSheet(); main.classList.remove('show-track'); setTab(0, true); }
+  function play(switching) {
     stop();
-    resetSheet();
-    main.classList.remove('show-track');
-    setTab(0, true);
-    if (!live || !active) { setFeed(ORD.scroll); return; }
-    if (calm) still(active); else run(RUN[active]);
+    if (!live || !active) { resetAll(); setFeed(ORD.scroll); return; }
+    if (calm) { resetAll(); still(active); return; }
+    run(async function () {
+      // A new step: the screen dips to the app's background, the next demo is set up behind it, and it comes up.
+      if (switching) await tw(cut, [{ opacity: 0 }, { opacity: 1 }], { duration: 170, easing: 'ease-in' });
+      resetAll();
+      if (switching) {
+        tw(cut, [{ opacity: 1 }, { opacity: 1, offset: 0.18 }, { opacity: 0 }], { duration: 480, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' }).then(function () { drop(cut); }, noop);
+        tw(main, [{ transform: 'translateY(18px)' }, { transform: 'none' }], { duration: 560, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' }).catch(noop);
+      }
+      await RUN[active]();
+    });
   }
   function setStep(li) {
     var k = li.getAttribute('data-step');
     steps.forEach(function (s) { s.classList.toggle('is-on', s === li); });
     if (k === active) return;
     active = k;
-    play();
+    play(true);
   }
+
 
   // Size: as large as fits under the top bar with a little room below, and no wider than its column. On phones
   // what's left under the pinned phone must still fit a step's text. The CSS values are the no-script fallback.
@@ -3497,6 +3578,10 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
     sec.style.setProperty('--pp', pp + 'px');
     sec.style.setProperty('--ph-s', s.toFixed(3));
     if (head) sec.style.setProperty('--head-h', (head.offsetHeight + 8) + 'px');
+    // each step's text is centred on the phone by its own height, so steps of different lengths never overlap
+    var ins = sec.querySelectorAll('.pk-step-in');
+    Array.prototype.forEach.call(ins, function (el) { el.style.setProperty('--half', (el.offsetHeight / 2).toFixed(1) + 'px'); });
+    if (ins[0]) sec.style.setProperty('--half1', (ins[0].offsetHeight / 2).toFixed(1) + 'px');
   }
   fit();
   setFeed(ORD.scroll);
