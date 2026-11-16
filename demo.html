@@ -573,6 +573,15 @@ html:not(.js) .theme-toggle { display: none; }
 }
 .more-shot .player { aspect-ratio: 1280 / 722; border-radius: 20px; overflow: hidden; background: var(--tint); }
 .more-shot video { display: block; width: 100%; height: 100%; object-fit: cover; }
+/* The cover is a still of the frame the loop starts on. It sits over the video until the video has painted a
+   frame of its own from there (.is-shown, set by script), then fades out, so the switch can't be seen. */
+.more-shot .player { position: relative; }
+.more-shot .cover { position: absolute; inset: 0; transition: opacity 0.24s ease, visibility 0s linear 0s; }
+.more-shot .cover img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.more-shot .player.is-shown .cover { opacity: 0; visibility: hidden; transition: opacity 0.24s ease, visibility 0s linear 0.24s; }
+/* Never a play button: Safari draws its own over a <video> it won't start by itself (Low Power Mode). */
+.more-shot video::-webkit-media-controls-start-playback-button { display: none !important; -webkit-appearance: none; }
+.more-shot video::-webkit-media-controls { display: none !important; }
 .more-copy { position: relative; display: grid; justify-items: center; gap: 28px; max-width: 560px; margin-top: clamp(-96px, -9vw, -40px); text-align: center; }
 
 /* The landing page's dark pill with the arrow */
@@ -854,7 +863,7 @@ html.lenis, html.lenis body { height: auto; }
 
   <section class="more" aria-labelledby="more-title">
     <div class="more-shot ap">
-      <div class="player"><video src="demo-2.mp4#t=2.5" poster="poster-2-app.jpg" muted playsinline preload="none" disablepictureinpicture aria-label="Demo: Bet’s dashboard and tracker"></video></div>
+      <div class="player"><video data-src="demo-2.mp4" data-src-720="demo-2-720.mp4" data-hls="demo-2.m3u8" data-hls-720="demo-2-720.m3u8" data-start="2.1" data-end="15.4" muted playsinline preload="none" disablepictureinpicture aria-label="Demo: Bet’s dashboard and tracker"></video><picture class="cover"><source type="image/webp" srcset="poster-2-app-1280.webp 1280w, poster-2-app-1920.webp 1920w" sizes="(max-width: 960px) calc(100vw - 72px), 860px"><img src="poster-2-app.jpg" width="1920" height="1080" alt="" decoding="async" loading="lazy"></picture></div>
     </div>
     <div class="more-copy ap">
       <h2 class="more-title" id="more-title">See how it works</h2>
@@ -872,8 +881,8 @@ html.lenis, html.lenis body { height: auto; }
       <div class="sf-cols">
         <div class="sf-col" data-reveal style="--d:0.08s">
           <p class="sf-col-title">Product</p>
-          <a href="index.html#dashboard">Dashboard</a>
           <a href="index.html#autofill">Autofill</a>
+          <a href="index.html#dashboard">Dashboard</a>
           <a href="index.html#tracker">Tracker</a>
           <a href="index.html#phone">Mobile app</a>
         </div>
@@ -1008,8 +1017,13 @@ html.lenis, html.lenis body { height: auto; }
 </script>
 <script>
 // Common questions: one answer open at a time. The product video plays (muted) only while it's on screen and
-// loops the dashboard part only, skipping its title card (0 to 2.5s) and its "bet." end card (from about 37s).
-// For reduced motion it stays on its poster, a still of the 2.5s frame.
+// loops the dashboard part only, from data-start to data-end on the video (in seconds), skipping its title card
+// and its "bet." end card. Its cover is a still of the data-start frame (poster-2-app.*, made by encode.sh with
+// the same seconds). Nothing downloads until the video is near. Where the browser won't start it by itself
+// (Low Power Mode) the cover stays, with no play button, and the next tap anywhere on the page starts it.
+// The file: 720p for a player up to about 1400 device pixels wide or a slow connection, 1080p otherwise;
+// Safari gets the HLS copy (it starts a plain MP4 only once a big chunk has arrived). A missing copy falls
+// through to the next.
 (function () {
   var items = Array.prototype.slice.call(document.querySelectorAll('.faq-item'));
   items.forEach(function (item) {
@@ -1024,19 +1038,64 @@ html.lenis, html.lenis body { height: auto; }
   });
 
   var video = document.querySelector('.more video');
-  var calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (!video || calm || !('IntersectionObserver' in window)) return;
-  var START = 2.5, END = 36.9;
+  if (!video || !('IntersectionObserver' in window)) return;
+  var START = parseFloat(video.getAttribute('data-start')) || 0;
+  var END = parseFloat(video.getAttribute('data-end')) || Infinity;
+  var player = video.parentNode, files = null;
+  function pickFiles() {
+    var c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    var low = player.clientWidth * (window.devicePixelRatio || 1) <= 1400 || !!(c && (c.saveData || /(^|-)[23]g$/.test(c.effectiveType || '')));
+    var names = low ? ['data-src-720', 'data-src'] : ['data-src'];
+    if (/Apple/.test(navigator.vendor || '') && video.canPlayType('application/vnd.apple.mpegurl')) names.unshift(low ? 'data-hls-720' : 'data-hls');
+    return names.map(function (n) { return video.getAttribute(n); }).filter(Boolean);
+  }
+  function load() {
+    if (video.getAttribute('src')) return;
+    files = files || pickFiles();
+    if (!files.length) return;
+    video.preload = 'auto';
+    video.src = files[0] + (START ? '#t=' + START : '');
+  }
+  var inView = false, refused = false;
+  function play() {
+    load();
+    var p = video.play();
+    if (p && p.catch) p.catch(function (e) { if (e && e.name === 'NotAllowedError') refused = true; });
+  }
+  function unlock() { if (refused && inView && video.paused) { refused = false; play(); } }
+  ['touchend', 'click', 'keydown'].forEach(function (t) { document.addEventListener(t, unlock, true); });
+  video.addEventListener('error', function () {
+    if (!video.getAttribute('src') || !files || files.length < 2) return;
+    files.shift();
+    video.removeAttribute('src');
+    play();
+  });
   function wrap() { if (video.currentTime >= END || video.currentTime < START - 0.05) video.currentTime = START; }
+  video.addEventListener('loadedmetadata', wrap);   // where the #t= start isn't honoured
   video.addEventListener('timeupdate', wrap);
   video.addEventListener('ended', function () { video.currentTime = START; var p = video.play(); if (p && p.catch) p.catch(function () {}); });
-  if (typeof video.requestVideoFrameCallback === 'function') {
-    var frame = function () { wrap(); video.requestVideoFrameCallback(frame); };   // checked every frame where supported, so the end card never shows
+  function live() { return !video.paused && video.currentTime >= START - 0.05; }   // playing, from the cover's frame on
+  var frames = 0;
+  function everyFrame() {   // checked every frame where supported, so the end card never shows. Started when playback
+    if (typeof video.requestVideoFrameCallback !== 'function') return;   // starts: WebKit drops one asked for any earlier
+    var n = ++frames;
+    var frame = function () {
+      if (n !== frames) return;
+      wrap();
+      if (live()) player.classList.add('is-shown');
+      video.requestVideoFrameCallback(frame);
+    };
     video.requestVideoFrameCallback(frame);
   }
+  video.addEventListener('playing', everyFrame);
+  video.addEventListener('timeupdate', function () { if (live() && video.currentTime > START + 0.25) player.classList.add('is-shown'); });
+  new IntersectionObserver(function (entries) {   // fetch it when it's half a screen away
+    if (entries[entries.length - 1].isIntersecting) load();
+  }, { rootMargin: '50% 0px' }).observe(video);
   new IntersectionObserver(function (entries) {
     entries.forEach(function (en) {
-      if (en.isIntersecting) { var p = video.play(); if (p && p.catch) p.catch(function () {}); }
+      inView = en.isIntersecting;
+      if (inView) play();
       else video.pause();
     });
   }, { threshold: 0.3 }).observe(video);

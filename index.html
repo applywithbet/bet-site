@@ -757,6 +757,51 @@ html:not(.js) .theme-toggle { display: none; }      /* it needs the script */
 }
 .placeholder svg { width: 56px; height: 56px; color: var(--primary); }
 .placeholder[hidden], video[hidden] { display: none; }
+/* The cover is the video's first frame as a picture. It sits over the video until the video has painted a
+   frame of its own (.is-shown, set by script), then fades out, so the switch can't be seen. A video stopped
+   off the active card leaves its last frame behind in a canvas (.freeze) until it plays again. */
+.player .cover, .player .freeze {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+.player .cover { display: block; transition: opacity 0.24s ease, visibility 0s linear 0s; }
+.player .cover img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.player.is-shown .cover { opacity: 0; visibility: hidden; transition: opacity 0.24s ease, visibility 0s linear 0.24s; }
+.player .freeze[hidden] { display: none; }
+/* A video waiting for data keeps its frame; after 600ms three quiet dots show in the corner. */
+.wait-dots {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  display: flex;
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 78%, transparent);
+  box-shadow: 0 0 0 1px var(--glass-edge), 0 6px 16px -10px rgb(10 12 30 / 0.4);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.wait-dots i { width: 5px; height: 5px; border-radius: 50%; background: var(--muted); opacity: 0.35; }
+.player.is-waiting .wait-dots { opacity: 1; }
+.player.wants-play .wait-dots { opacity: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .player.is-waiting .wait-dots i { animation: wait-dot 1.2s ease-in-out infinite; }
+  .player.is-waiting .wait-dots i:nth-child(2) { animation-delay: 0.16s; }
+  .player.is-waiting .wait-dots i:nth-child(3) { animation-delay: 0.32s; }
+}
+@keyframes wait-dot { 0%, 70%, 100% { opacity: 0.35; } 35% { opacity: 0.9; } }
+@media (max-width: 767px) {
+  .wait-dots { right: 8px; bottom: 8px; padding: 6px 8px; }
+  .wait-dots i { width: 4px; height: 4px; }
+}
 
 /* Tablet: narrower intro column */
 @media (min-width: 768px) and (max-width: 1199px) {
@@ -1403,7 +1448,7 @@ html.lenis, html.lenis body { height: auto; }
   .hero-actions > :nth-child(2) { animation-delay: 1.62s; }
   [data-reveal] { transition: opacity 0.6s ease, transform 0.75s cubic-bezier(0.16, 1, 0.3, 1); transition-delay: var(--d, 0s); }
   [data-reveal].pending { opacity: 0; transform: translateY(32px); }
-  [data-reveal="words"] .w { display: inline-block; overflow: hidden; vertical-align: bottom; padding-bottom: 0.1em; margin-bottom: -0.1em; }
+  [data-reveal="words"] .w { display: inline-block; overflow: hidden; vertical-align: bottom; padding: 0 0.08em 0.1em; margin: 0 -0.08em -0.1em; }   /* room at the sides too: with tight letter spacing a last letter reaches past its box and was shaved off */
   [data-reveal="words"] .w > span { display: inline-block; transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); transition-delay: var(--d, 0s); }
   [data-reveal="words"].pending { opacity: 1; transform: none; }
   [data-reveal="words"].pending .w > span { transform: translateY(105%); }
@@ -1506,26 +1551,12 @@ html.lenis, html.lenis body { height: auto; }
   .touch .hero.stick { position: sticky; top: 0; }   /* "stick" is set by script only when the hero fits the screen */
 }
 .hero.is-past .blob, .hero.is-past .hero-mascot-fig { animation-play-state: paused; }   /* nothing animates once the sheet covers it */
-/* A demo that can't start by itself (low power mode, reduced motion, data saver) shows a play badge; a tap on the player starts it. */
-.play-badge {
-  position: absolute;
-  left: 50%; top: 50%;
-  width: 64px; height: 64px;
-  translate: -50% -50%;
-  display: none;
-  place-items: center;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--surface) 84%, transparent);
-  color: var(--ink);
-  box-shadow: 0 0 0 1px var(--glass-edge), 0 10px 30px -10px rgb(10 12 30 / 0.45);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  cursor: pointer;
-}
-.play-badge svg { width: 26px; height: 26px; margin-left: 3px; }
-.player.wants-play .play-badge { display: grid; }
+/* No demo ever shows a play button. Where the browser won't start a video by itself (Low Power Mode), the cover
+   (the video's first frame) stays up, and Safari plays the same MP4 inside an <img> laid over it (.motion), which
+   autoplay rules don't cover. Safari's own start button, drawn over a refused <video>, is hidden as well. */
+.player .motion { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+.player video::-webkit-media-controls-start-playback-button { display: none !important; -webkit-appearance: none; }
+.player video::-webkit-media-controls { display: none !important; }
 .player.wants-play { cursor: pointer; }
 /* Liquid glass, the same recipe as the top bar: a tinted gradient over a blurred, saturated backdrop,
    an inset rim light, a hairline edge, a sheen across the top and a layered shadow. */
@@ -2098,7 +2129,7 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
   <section class="demos" id="demos" aria-label="How Bet works">
     <div class="demos-frame" aria-hidden="true"></div>
     <div class="fc ap ap-band" aria-label="What Bet does">
-      <div class="fc-track"><ul class="fc-list"><li><a class="fc-card" href="#first-screen">Import your resume</a></li><li><a class="fc-card" href="#dashboard">20 jobs a day, picked for you</a></li><li><a class="fc-card" href="#dashboard">New jobs every hour</a></li><li><a class="fc-card" href="#autofill">Apply with autofill</a></li><li><a class="fc-card" href="#autofill">About a minute per application</a></li><li><a class="fc-card" href="#autofill">Works on Greenhouse, Workday, Lever</a></li><li><a class="fc-card" href="#tracker">Track every application</a></li><li><a class="fc-card" href="#tracker">Reach out to people at the company</a></li></ul><ul class="fc-list" aria-hidden="true"><li><a class="fc-card" href="#first-screen" tabindex="-1">Import your resume</a></li><li><a class="fc-card" href="#dashboard" tabindex="-1">20 jobs a day, picked for you</a></li><li><a class="fc-card" href="#dashboard" tabindex="-1">New jobs every hour</a></li><li><a class="fc-card" href="#autofill" tabindex="-1">Apply with autofill</a></li><li><a class="fc-card" href="#autofill" tabindex="-1">About a minute per application</a></li><li><a class="fc-card" href="#autofill" tabindex="-1">Works on Greenhouse, Workday, Lever</a></li><li><a class="fc-card" href="#tracker" tabindex="-1">Track every application</a></li><li><a class="fc-card" href="#tracker" tabindex="-1">Reach out to people at the company</a></li></ul></div>
+      <div class="fc-track"><ul class="fc-list"><li><a class="fc-card" href="#first-screen">Import your resume</a></li><li><a class="fc-card" href="#autofill">Apply with autofill</a></li><li><a class="fc-card" href="#autofill">About a minute per application</a></li><li><a class="fc-card" href="#autofill">Works on Greenhouse, Workday, Lever</a></li><li><a class="fc-card" href="#dashboard">20 jobs a day, picked for you</a></li><li><a class="fc-card" href="#dashboard">New jobs every hour</a></li><li><a class="fc-card" href="#tracker">Track every application</a></li><li><a class="fc-card" href="#tracker">Reach out to people at the company</a></li></ul><ul class="fc-list" aria-hidden="true"><li><a class="fc-card" href="#first-screen" tabindex="-1">Import your resume</a></li><li><a class="fc-card" href="#autofill" tabindex="-1">Apply with autofill</a></li><li><a class="fc-card" href="#autofill" tabindex="-1">About a minute per application</a></li><li><a class="fc-card" href="#autofill" tabindex="-1">Works on Greenhouse, Workday, Lever</a></li><li><a class="fc-card" href="#dashboard" tabindex="-1">20 jobs a day, picked for you</a></li><li><a class="fc-card" href="#dashboard" tabindex="-1">New jobs every hour</a></li><li><a class="fc-card" href="#tracker" tabindex="-1">Track every application</a></li><li><a class="fc-card" href="#tracker" tabindex="-1">Reach out to people at the company</a></li></ul></div>
     </div>
     <div class="demos-grid">
       <aside class="intro ap ap-intro">
@@ -2107,8 +2138,8 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
         </div>
         <nav class="dnav" aria-label="Jump to a demo">
           <a class="dnav-item is-on" href="#first-screen"><span class="t off">The first screen</span><span class="t on" aria-hidden="true">The first screen</span></a>
-          <a class="dnav-item" href="#dashboard"><span class="t off">Your dashboard</span><span class="t on" aria-hidden="true">Your dashboard</span></a>
           <a class="dnav-item" href="#autofill"><span class="t off">Apply with autofill</span><span class="t on" aria-hidden="true">Apply with autofill</span></a>
+          <a class="dnav-item" href="#dashboard"><span class="t off">Your dashboard</span><span class="t on" aria-hidden="true">Your dashboard</span></a>
           <a class="dnav-item" href="#tracker"><span class="t off">Your tracker</span><span class="t on" aria-hidden="true">Your tracker</span></a>
         </nav>
       <span class="bet-spot intro-spot" aria-hidden="true"></span>
@@ -2122,19 +2153,8 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
           </div>
           <div class="shot">
             <div class="player">
-              <video src="demo-1.mp4" poster="poster-1.jpg" muted loop playsinline preload="none" disablepictureinpicture aria-label="Demo 1: the first screen you see"></video>
-              <div class="placeholder" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 8.5v7l6-3.5z" fill="currentColor"/></svg>Video coming soon</div>
-            </div>
-          </div>
-        </section>
-        <section class="card ap" id="dashboard" data-id="dashboard">
-          <div class="card-head">
-            <h3>Your customized dashboard</h3>
-            <p class="desc">Hit a daily goal of 20 applications, find more jobs in the job bank, and track every application.</p>
-          </div>
-          <div class="shot">
-            <div class="player">
-              <video src="demo-2.mp4" poster="poster-2.jpg" muted loop playsinline preload="none" disablepictureinpicture aria-label="Demo 2: your customized dashboard"></video>
+              <video data-src="demo-1.mp4" data-src-720="demo-1-720.mp4" data-hls="demo-1.m3u8" data-hls-720="demo-1-720.m3u8" muted loop playsinline preload="none" disablepictureinpicture aria-label="Demo 1: the first screen you see"></video>
+              <picture class="cover"><source type="image/webp" srcset="poster-1-1280.webp 1280w, poster-1-1920.webp 1920w" sizes="(max-width: 767px) calc(100vw - 72px), (max-width: 1199px) calc(92vw - 312px), 704px"><img src="poster-1.jpg" width="1920" height="1080" alt="" decoding="async"></picture>
               <div class="placeholder" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 8.5v7l6-3.5z" fill="currentColor"/></svg>Video coming soon</div>
             </div>
           </div>
@@ -2146,7 +2166,21 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
           </div>
           <div class="shot">
             <div class="player">
-              <video src="demo-3.mp4" poster="poster-3.jpg" muted loop playsinline preload="none" disablepictureinpicture aria-label="Demo 3: apply with autofill"></video>
+              <video data-src="demo-3.mp4" data-src-720="demo-3-720.mp4" data-hls="demo-3.m3u8" data-hls-720="demo-3-720.m3u8" muted loop playsinline preload="none" disablepictureinpicture aria-label="Demo 2: apply with autofill"></video>
+              <picture class="cover"><source type="image/webp" srcset="poster-3-1280.webp 1280w, poster-3-1920.webp 1920w" sizes="(max-width: 767px) calc(100vw - 72px), (max-width: 1199px) calc(92vw - 312px), 704px"><img src="poster-3.jpg" width="1920" height="1080" alt="" decoding="async" fetchpriority="low"></picture>
+              <div class="placeholder" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 8.5v7l6-3.5z" fill="currentColor"/></svg>Video coming soon</div>
+            </div>
+          </div>
+        </section>
+        <section class="card ap" id="dashboard" data-id="dashboard">
+          <div class="card-head">
+            <h3>Your customized dashboard</h3>
+            <p class="desc">Hit a daily goal of 20 applications, find more jobs in the job bank, and track every application.</p>
+          </div>
+          <div class="shot">
+            <div class="player">
+              <video data-src="demo-2.mp4" data-src-720="demo-2-720.mp4" data-hls="demo-2.m3u8" data-hls-720="demo-2-720.m3u8" muted loop playsinline preload="none" disablepictureinpicture aria-label="Demo 3: your customized dashboard"></video>
+              <picture class="cover"><source type="image/webp" srcset="poster-2-1280.webp 1280w, poster-2-1920.webp 1920w" sizes="(max-width: 767px) calc(100vw - 72px), (max-width: 1199px) calc(92vw - 312px), 704px"><img src="poster-2.jpg" width="1920" height="1080" alt="" decoding="async" fetchpriority="low"></picture>
               <div class="placeholder" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 8.5v7l6-3.5z" fill="currentColor"/></svg>Video coming soon</div>
             </div>
           </div>
@@ -2158,7 +2192,8 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
           </div>
           <div class="shot">
             <div class="player">
-              <video src="demo-4.mp4" poster="poster-4.jpg" muted loop playsinline preload="none" disablepictureinpicture aria-label="Demo 4: use your tracker"></video>
+              <video data-src="demo-4.mp4" data-src-720="demo-4-720.mp4" data-hls="demo-4.m3u8" data-hls-720="demo-4-720.m3u8" muted loop playsinline preload="none" disablepictureinpicture aria-label="Demo 4: use your tracker"></video>
+              <picture class="cover"><source type="image/webp" srcset="poster-4-1280.webp 1280w, poster-4-1920.webp 1920w" sizes="(max-width: 767px) calc(100vw - 72px), (max-width: 1199px) calc(92vw - 312px), 704px"><img src="poster-4.jpg" width="1920" height="1080" alt="" decoding="async" fetchpriority="low"></picture>
               <div class="placeholder" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 8.5v7l6-3.5z" fill="currentColor"/></svg>Video coming soon</div>
             </div>
           </div>
@@ -2269,7 +2304,7 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
     <div class="bento">
       <div class="tile t-head" data-reveal style="--d:0s">
         <div class="t-dots" aria-hidden="true"></div>
-        <h2 class="bento-title" data-reveal="words"><span class="line"><span class="w"><span style="--d:0.10s">A</span></span> <span class="w"><span style="--d:0.14s">simple</span></span> <span class="w"><span style="--d:0.17s">job</span></span> <span class="w"><span style="--d:0.21s">board</span></span> <span class="w"><span style="--d:0.24s">people</span></span> <span class="w"><span style="--d:0.28s">actually</span></span> <span class="w"><span style="--d:0.31s">want</span></span> <span class="w"><span style="--d:0.35s">to</span></span> <span class="w"><span style="--d:0.38s">use.</span></span></span> <span class="line hl"><span class="w"><span style="--d:0.46s">And</span></span> <span class="w"><span style="--d:0.49s">it</span></span> <span class="w"><span style="--d:0.53s">applies</span></span> <span class="w"><span style="--d:0.56s">for</span></span> <span class="w"><span style="--d:0.60s">you.</span></span></span></h2>
+        <h2 class="bento-title" data-reveal="words"><span class="line"><span class="w"><span style="--d:0.10s">A</span></span> <span class="w"><span style="--d:0.14s">simple</span></span> <span class="w"><span style="--d:0.17s">job</span></span> <span class="w"><span style="--d:0.21s">board.</span></span></span> <span class="line hl"><span class="w"><span style="--d:0.30s">And</span></span> <span class="w"><span style="--d:0.34s">it</span></span> <span class="w"><span style="--d:0.37s">applies</span></span> <span class="w"><span style="--d:0.41s">for</span></span> <span class="w"><span style="--d:0.44s">you.</span></span></span></h2>
       </div>
 
       <div class="tile t-stat" data-reveal style="--d:0.08s">
@@ -2329,7 +2364,7 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
           <p class="contact-label" data-reveal style="--d:0.06s">Contact us</p>
           <h2 class="contact-title" data-reveal style="--d:0.10s">Let’s work together.</h2>
           <div class="reach" data-reveal style="--d:0.14s">
-            <p class="reach-line">For partnerships, press or a quick hello, email us.</p>
+            <p class="reach-line">Partner with us or just say hi.</p>
             <button class="inbox" type="button" data-copy="applywithbet@gmail.com" aria-label="Copy email address, applywithbet@gmail.com"><span class="inbox-text"><span class="inbox-addr">applywithbet@gmail.com</span><span class="inbox-done" aria-hidden="true">Copied to clipboard</span></span><span class="inbox-icon" aria-hidden="true"><svg class="i-copy" viewBox="0 0 16 16"><rect x="5.5" y="5.5" width="8" height="8" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.5 3.3A1.7 1.7 0 0 0 9 2.5H4.2a1.7 1.7 0 0 0-1.7 1.7V9a1.7 1.7 0 0 0 .8 1.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><svg class="i-check" viewBox="0 0 16 16"><path d="M3.2 8.4 6.4 11.4 12.8 4.8" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
             <span class="inbox-live" role="status"></span>
           </div>
@@ -2369,8 +2404,8 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
       <div class="sf-cols">
         <div class="sf-col" data-reveal style="--d:0.08s">
           <p class="sf-col-title">Product</p>
-          <a href="#dashboard">Dashboard</a>
           <a href="#autofill">Autofill</a>
+          <a href="#dashboard">Dashboard</a>
           <a href="#tracker">Tracker</a>
           <a href="#phone">Mobile app</a>
         </div>
@@ -2401,48 +2436,303 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
   var touch = !fine;                                                                                   // phones and tablets: native scrolling
   var buddyWake = null;   // set up once Bet is lifted out of the hero (below)
 
-  // Demo players. The active card's video plays by itself where the browser allows it; where it doesn't
-  // (low power mode, reduced motion, data saver) a play badge appears and a tap on the player starts it.
-  // A video is only fetched once its card is near the screen. One that hasn't been uploaded yet shows
-  // the "coming soon" panel.
+  // Demo players. The active card's video plays by itself, and there is never a play button. Where the browser
+  // refuses to start one (Low Power Mode on an iPhone or a Mac) the cover stays up and Safari plays the same MP4
+  // inside an <img> over it, like a GIF; the first tap anywhere on the page then lets the real videos start.
+  // Loading: the active card's video comes first and has the connection to itself. Once it can play through,
+  // the other cards' videos load one at a time, the ones below first, so every demo is ready before you get to
+  // it. Small players (phones) and slow connections get the 720p file, which looks the same as 1080p at that
+  // size; bigger players get 1080p (picked once, when the video is first needed). A video left behind while it's
+  // still downloading stops so the active one isn't starved. Each player shows its cover (the video's first
+  // frame as a picture) until the video has painted a frame of its own, so there's never a blank or black flash.
+  // A video that stalls keeps its frame, and after a moment three quiet dots show in the corner. One that can't
+  // be loaded at all keeps its cover.
   var players = Array.prototype.slice.call(document.querySelectorAll('.player'));
-  function wantsPlay(v, on) { var p = v.closest('.player'); if (p) p.classList.toggle('wants-play', on); }
+  var clips = [];        // one per player: its video, its file, whether it has painted, where to pick up again
+  var warmClip = null;   // the next card's video, warming up behind the active one
+  var stalled = false;   // a video has stalled mid-play: the connection is slow, whatever it says
+  var refused = false;   // the browser has refused to start a video by itself (Low Power Mode): the next tap retries
+  function slowNet() {
+    var c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    return stalled || !!(c && (c.saveData || /(^|-)[23]g$/.test(c.effectiveType || '')));
+  }
+  function lean() { return slowNet(); }   // slow connections warm the other videos lightly (their opening only)
+  function clipOf(v) {
+    for (var i = 0; i < clips.length; i++) if (clips[i].v === v) return clips[i];
+    return null;
+  }
+  function onCard(k) { var c = k.p.closest('.card'); return !!c && c.classList.contains('is-active'); }
+  function wantsPlay(v, on) {
+    var p = v.closest('.player');
+    if (p) p.classList.toggle('wants-play', on);
+    if (on) waiting(clipOf(v), false);
+  }
+  function waiting(k, on) {   // the dots only show once a wait has lasted 600ms, so a quick start shows nothing
+    if (!k) return;
+    clearTimeout(k.waitT);
+    if (on) k.waitT = setTimeout(function () { k.p.classList.add('is-waiting'); }, 600);
+    else k.p.classList.remove('is-waiting');
+  }
+  // The file, picked once: 720p when the player is up to about 1400 device pixels wide, or the connection is
+  // slow or saving data; 1080p otherwise. Safari (and every browser on an iPhone) gets the HLS copy: it starts
+  // a plain MP4 only once a big chunk has arrived, HLS after its first 2 s piece. If a file is missing, the
+  // next one in the list is tried.
+  var appleHls = /Apple/.test(navigator.vendor || '') && !!document.createElement('video').canPlayType('application/vnd.apple.mpegurl');
+  function small(k) { return k.p.clientWidth * (window.devicePixelRatio || 1) <= 1400 || slowNet(); }
+  function filesFor(k) {
+    var low = small(k);
+    var names = low ? ['data-src-720', 'data-src'] : ['data-src'];
+    if (appleHls) names.unshift(low ? 'data-hls-720' : 'data-hls');
+    return names.map(function (n) { return k.v.getAttribute(n); }).filter(Boolean);
+  }
+  var preloadRank = { none: 0, metadata: 1, auto: 2 };
+  function feed(k, how) {   // give the video its file, or let the browser fetch more of it
+    if (!k || k.v.hidden) return;
+    var v = k.v;
+    if (preloadRank[how] > (preloadRank[v.preload] || 0)) v.preload = how;
+    if (v.getAttribute('src')) return;
+    k.files = k.files || filesFor(k);
+    if (!k.files.length) return;
+    k.src = k.files[0];
+    k.from = k.at;
+    v.src = k.at ? k.src + '#t=' + k.at.toFixed(3) : k.src;   // stopped part way: carry on from that frame
+    if (k.at) try { v.currentTime = k.at; } catch (e) {}       // (HLS ignores #t=; this makes it fetch from there, not from 0)
+  }
+  function shown(k) {   // a frame of its own is on screen: the cover (or the still, or the picture copy) can go
+    k.live = true;
+    k.p.classList.add('is-shown');
+    if (k.still) k.still.hidden = true;
+    unmove(k);
+  }
+  // The picture copy, for a video the browser won't start: Safari (WebKit) plays an MP4 inside an <img> the way
+  // it plays a GIF, and autoplay rules only cover <video>. It goes up once its whole file is in, starting on
+  // its first frame, which is the cover's, so the switch can't be seen. It comes down when the demo is left (so
+  // coming back starts it over) or when the real video takes over.
+  var pictureVideo = appleHls;
+  function move(k) {
+    if (!pictureVideo || !k || k.pic || k.live || k.v.hidden) return;
+    var src = k.v.getAttribute(small(k) ? 'data-src-720' : 'data-src') || k.v.getAttribute('data-src');
+    if (!src) return;
+    var img = k.pic = new Image();
+    img.className = 'motion';
+    img.alt = '';
+    img.setAttribute('aria-hidden', 'true');
+    img.onload = function () {
+      if (k.pic !== img || k.live || !onCard(k)) return;
+      var cover = k.p.querySelector('.cover');
+      k.p.insertBefore(img, cover ? cover.nextSibling : k.v.nextSibling);
+    };
+    img.onerror = function () { if (k.pic === img) { k.pic = null; pictureVideo = false; } };   // an older Safari: the cover stays
+    img.src = src;
+  }
+  function unmove(k) {
+    var img = k && k.pic;
+    if (!img) return;
+    k.pic = null;
+    img.onload = img.onerror = null;
+    if (img.parentNode) img.parentNode.removeChild(img);
+    img.removeAttribute('src');   // let go of the file, so the next copy starts from its first frame
+  }
+  function watchPaint(k) {   // the first frame painted while playing, from where it should start
+    var v = k.v, n = ++k.gen;
+    function ready() { return n === k.gen && !v.paused && v.currentTime >= k.from - 0.3; }
+    if (typeof v.requestVideoFrameCallback === 'function') {
+      v.requestVideoFrameCallback(function frame() {
+        if (n !== k.gen) return;
+        if (ready()) shown(k); else v.requestVideoFrameCallback(frame);
+      });
+    } else {
+      var t0 = null;
+      v.addEventListener('timeupdate', function tick() {
+        if (n !== k.gen) { v.removeEventListener('timeupdate', tick); return; }
+        if (v.paused) return;
+        if (t0 === null) { t0 = v.currentTime; return; }   // the first tick after 'playing' can come before the frame is up
+        if (v.currentTime !== t0 && ready()) { v.removeEventListener('timeupdate', tick); shown(k); }
+      });
+    }
+  }
   function tryPlay(v) {
     if (!v || v.hidden) return;
+    var k = clipOf(v);
+    if (k) {
+      k.away = false;
+      k.want = true;
+      feed(k, 'auto');
+      if (!k.live) watchPaint(k);
+      if (v.paused || v.readyState < 3) waiting(k, true);   // cleared by 'playing'
+    }
     var pr = v.play();
-    if (pr && pr.then) pr.then(function () { wantsPlay(v, false); }, function () { wantsPlay(v, true); });
+    if (pr && pr.then) pr.then(function () { wantsPlay(v, false); }, function (e) {
+      var why = e && e.name;
+      if (why === 'AbortError' || why === 'NotSupportedError') return;   // cut short by a pause or a new file, or a missing file (handled below)
+      if (k) { k.want = false; waiting(k, false); }
+      if (v.paused && !v.hidden && (!k || onCard(k))) {
+        wantsPlay(v, true);
+        if (why === 'NotAllowedError') { refused = true; move(k); }   // no play button: the cover stays, the picture copy plays
+      }
+    });
     else wantsPlay(v, false);
+  }
+  function loadedAll(v) {
+    var b = v.buffered, d = v.duration;
+    for (var i = 0; i < b.length; i++) if (b.start(i) <= 0.25 && b.end(i) >= d - 0.25) return true;
+    return false;
+  }
+  function grab(k) {   // the frame on screen, into a canvas laid over the video
+    var v = k.v;
+    if (v.readyState < 2 || !v.videoWidth) return false;
+    var c = k.still;
+    if (!c) {
+      c = k.still = document.createElement('canvas');
+      c.className = 'freeze';
+      c.setAttribute('aria-hidden', 'true');
+      v.parentNode.insertBefore(c, v.nextSibling);
+    }
+    var w = Math.min(v.videoWidth, Math.round(k.p.clientWidth * (window.devicePixelRatio || 1))) || v.videoWidth;
+    c.width = w;
+    c.height = Math.round(w * v.videoHeight / v.videoWidth);
+    try {
+      var g = c.getContext('2d');
+      g.drawImage(v, 0, 0, c.width, c.height);
+      if (!g.getImageData(c.width >> 1, c.height >> 1, 1, 1).data[3]) throw 0;   // nothing drawn
+    } catch (e) { c.hidden = true; return false; }
+    c.hidden = false;
+    return true;
+  }
+  // Off the active card: pause, and if it's still downloading, stop that, so the active video has the
+  // connection to itself. Its last frame stays up as a still and it carries on from there next time.
+  function park(k) {
+    if (!k) return;
+    var v = k.v;
+    k.want = false;
+    waiting(k, false);
+    unmove(k);
+    if (!v.paused) v.pause();
+    // Leaving a demo rewinds it: its cover (the title card) comes back, and coming back starts it over.
+    k.at = 0;
+    k.from = 0;
+    k.live = false;   // so the cover fades again once the replay's first frame is up
+    if (k.still) k.still.hidden = true;
+    k.p.classList.remove('is-shown');
+    if (v.getAttribute('src')) { try { v.currentTime = 0; } catch (e) {} }
+    if (k === warmClip || v.hidden || !v.getAttribute('src') || loadedAll(v) || v.networkState !== 2) return;   // what it has already loaded, it keeps
+    k.gen++;   // any paint watch belongs to the old download
+    k.live = false;
+    k.played = false;
+    v.removeAttribute('src');
+    v.load();
+  }
+  // The active video can play through: load the other cards' videos, quietly and one at a time, the ones below
+  // first, but only once the active one has stopped downloading with plenty in hand, so only one video ever
+  // comes down the line.
+  function aheadOf(v) {   // seconds buffered past the playhead
+    var b = v.buffered, t = v.currentTime;
+    for (var i = 0; i < b.length; i++) if (b.start(i) <= t + 0.1 && b.end(i) > t) return b.end(i) - t;
+    return 0;
+  }
+  function warmNext() {
+    if (!current) return;
+    var a = current.querySelector('video');
+    if (a && !a.hidden && !loadedAll(a) && (a.networkState === 2 || aheadOf(a) < 8)) return;
+    if (warmClip && warmClip.v.networkState === 2 && !loadedAll(warmClip.v)) return;   // one at a time
+    var i = cards.indexOf(current);
+    var order = cards.slice(i + 1).concat(cards.slice(0, i).reverse());
+    for (var j = 0; j < order.length; j++) {
+      var v = order[j].querySelector('video'), k = v && clipOf(v);
+      if (!k || v.hidden || v.getAttribute('src')) continue;   // has its file already
+      warmClip = k;
+      feed(k, lean() ? 'metadata' : 'auto');
+      return;
+    }
   }
   players.forEach(function (p) {
     var v = p.querySelector('video');
     var ph = p.querySelector('.placeholder');
     if (!v) return;
-    function missing() { v.hidden = true; if (ph) ph.hidden = false; p.classList.remove('wants-play'); }
-    v.addEventListener('error', missing);
-    if (v.error) missing();
-    var badge = document.createElement('button');
-    badge.type = 'button';
-    badge.className = 'play-badge';
-    badge.setAttribute('aria-label', 'Play demo');
-    badge.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>';
-    p.appendChild(badge);
-    p.addEventListener('click', function () { if (v.paused) tryPlay(v); });
-    v.addEventListener('playing', function () { wantsPlay(v, false); });
-    v.addEventListener('pause', function () {
-      var c = v.closest('.card');
-      if (c && c.classList.contains('is-active') && !v.ended) wantsPlay(v, true);   // stopped by the browser: offer a tap
+    var k = { p: p, v: v, files: null, src: null, at: 0, from: 0, gen: 0, live: false, played: false, want: false, away: false, still: null, waitT: 0 };
+    clips.push(k);
+    function missing() {   // no copy of it would load: the cover stays (the "coming soon" panel is for a player without one)
+      v.hidden = true;
+      if (ph && !p.querySelector('.cover')) ph.hidden = false;
+      p.classList.remove('wants-play');
+      waiting(k, false);
+    }
+    v.addEventListener('error', function () {
+      if (!v.getAttribute('src')) return;                 // a download that was stopped, not a missing file
+      if (k.files && k.files.length > 1) {                // that copy is missing: try the next one
+        k.files.shift();
+        k.played = false;
+        v.removeAttribute('src');
+        if (onCard(k)) tryPlay(v); else feed(k, 'metadata');
+        return;
+      }
+      missing();
     });
+    var dots = document.createElement('span');
+    dots.className = 'wait-dots';
+    dots.setAttribute('aria-hidden', 'true');
+    dots.innerHTML = '<i></i><i></i><i></i>';
+    p.appendChild(dots);
+    p.addEventListener('click', function () { if (v.paused && !k.pic) tryPlay(v); });   // (the picture copy keeps going rather than restart)
+    v.addEventListener('loadedmetadata', function () {   // where the #t= start isn't honoured
+      if (k.from && Math.abs(v.currentTime - k.from) > 0.5 && k.from < v.duration) v.currentTime = k.from;
+    });
+    v.addEventListener('playing', function () {
+      k.played = true;
+      wantsPlay(v, false);
+      waiting(k, false);
+      if (!k.live && k.want) watchPaint(k);   // again: WebKit can drop a frame callback asked for before loading began
+    });
+    v.addEventListener('timeupdate', function () {   // backup for the paint watch: a quarter second of playback is on screen
+      if (!k.live && k.want && !v.paused && v.currentTime > k.from + 0.25) shown(k);
+    });
+    v.addEventListener('waiting', function () {
+      if (!k.want || v.paused) return;
+      waiting(k, true);
+      if (k.played) stalled = true;   // ran dry after it had started
+    });
+    v.addEventListener('pause', function () {
+      waiting(k, false);
+      if (k.hush) { k.hush = false; return; }
+      if (onCard(k) && !v.ended && !k.away && v.getAttribute('src')) { wantsPlay(v, true); refused = true; }   // stopped by the browser: the next tap starts it
+    });
+    v.addEventListener('canplaythrough', function () { if (onCard(k) || k === warmClip) warmNext(); });
+    v.addEventListener('suspend', function () { if (onCard(k) || k === warmClip) warmNext(); });   // the browser has stopped fetching it for now
   });
+  // Low Power Mode won't start a video by itself but lets a tap start one, and a video once started from a tap
+  // may start by itself after that. So once a video has been refused, the next tap anywhere on the page starts
+  // the active demo (unless its picture copy is already playing, which then keeps going) and readies every other
+  // video the same way: started and stopped at once, out of sight.
+  function unlock() {
+    if (!refused) return;
+    refused = false;
+    clips.forEach(function (k) {
+      var v = k.v;
+      if (v.hidden || !v.paused) return;
+      if (onCard(k) && !k.pic) { tryPlay(v); return; }
+      var pr = v.play();
+      if (pr && pr.catch) pr.catch(function () {});
+      if (!v.paused) { k.hush = true; v.pause(); }   // (that 'pause' is ours, not the browser's)
+    });
+  }
+  ['touchend', 'click', 'keydown'].forEach(function (t) { document.addEventListener(t, unlock, true); });
+  // Before any demo is active, the first one coming up (within half a screen) gets its opening ready, once
+  // the page itself has loaded. The active video rests while it's well off screen and carries on when it's back.
   if ('IntersectionObserver' in window) {
-    var vio = new IntersectionObserver(function (entries) {
+    var near = new IntersectionObserver(function (entries) {
       entries.forEach(function (en) {
-        if (!en.isIntersecting) return;
-        var v = en.target.querySelector('video');
-        if (v && !v.hidden && v.preload === 'none') v.preload = 'auto';
-        vio.unobserve(en.target);
+        var k = clipOf(en.target.querySelector('video'));
+        if (!k) return;
+        if (en.isIntersecting) {
+          if (!current && !warmClip) {
+            var go = function () { if (!current && !warmClip) { warmClip = k; feed(k, lean() ? 'metadata' : 'auto'); } };
+            if (document.readyState === 'complete') go(); else window.addEventListener('load', go);
+          }
+          if (k.away) { k.away = false; if (onCard(k)) tryPlay(k.v); }
+        } else if (onCard(k) && !k.v.paused) { k.away = true; k.v.pause(); }
       });
     }, { rootMargin: '50% 0px' });
-    players.forEach(function (p) { vio.observe(p); });
+    players.forEach(function (p) { near.observe(p); });
   }
 
   // Smooth scrolling (Lenis, 1.2s ease-out like the reference). Off when the viewer prefers reduced motion.
@@ -2536,14 +2826,17 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
   function focus(card) {
     if (card === current) return;
     current = card;
+    warmClip = null;   // the next card's video warms up once this one can play through
     cards.forEach(function (c) {
       var on = c === card;
       c.classList.toggle('is-active', on);
       var v = c.querySelector('video');
       if (!v || v.hidden) return;
-      if (on) { if (calm) wantsPlay(v, v.paused); else tryPlay(v); }   // reduced motion: nothing starts on its own
-      else { wantsPlay(v, false); if (!v.paused) v.pause(); }
+      if (on) tryPlay(v);
+      else { wantsPlay(v, false); park(clipOf(v)); }
     });
+    var av = card.querySelector('video');
+    if (av && av.readyState === 4) warmNext();   // already able to play through: no event is coming
     markNav(card);
   }
 
@@ -2565,9 +2858,9 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
 
   // Back from another tab or app: the active demo picks up again.
   document.addEventListener('visibilitychange', function () {
-    if (document.hidden || !current || calm) return;
+    if (document.hidden || !current) return;
     var v = current.querySelector('video');
-    if (v && !v.hidden && v.paused) tryPlay(v);
+    if (v && !v.hidden && v.paused && !(clipOf(v) || {}).away) tryPlay(v);
   });
 
   // Scroll reveals: only things below the first screen wait to animate in.
@@ -2997,6 +3290,10 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
       var f = Math.max(0, Math.min(r.bottom, vh) - Math.max(r.top, top)) / r.height;
       var mid = Math.abs((r.top + r.bottom) / 2 - (top + vh) / 2);   // distance from the middle of the view
       if (c === current) curF = f;
+      // A demo only takes over once it's mostly in view (55% of the player, or half the screen for a player taller
+      // than that), so it starts on its title card in front of the viewer, not while it peeks under the hero.
+      var need = Math.min(0.55, (vh - top) * 0.5 / r.height);
+      if (f < need) return;
       if (f > bestF + 0.001 || (f > 0 && Math.abs(f - bestF) <= 0.001 && mid < bestMid)) { best = c; bestF = f; bestMid = mid; }
     });
     if (!best) return null;
