@@ -3550,13 +3550,15 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
   // A demo takes over only once the page is moving slowly (under about 500px a second) and it has been the
   // one most in view for a moment. A quick scroll past the demos then leaves them on their covers and starts
   // only the one you come to rest on, instead of starting and stopping every video on the way, which flickered.
-  var cand = null, candT = 0, settleT = 0, lastY = 0, lastT = 0, speed = 0;
+  // (These names are only the demos'. This script is one big function, so a "var" here is shared with every
+  // other part of it: the travelling Bet's frame clock is "lastT", and reusing that name froze Bet.)
+  var cand = null, candT = 0, settleT = 0, demoScrollY = 0, demoScrollT = 0, demoSpeed = 0;
   function settle(best) {
     clearTimeout(settleT);
     if (!best || best === current) { cand = null; return; }
     var now = Date.now();
     if (best !== cand) { cand = best; candT = now; }
-    if (speed < 0.5 && now - candT >= 150) { cand = null; focus(best); return; }
+    if (demoSpeed < 0.5 && now - candT >= 150) { cand = null; focus(best); return; }
     settleT = setTimeout(update, 160);   // look again, in case the scroll slows or stops here
   }
 
@@ -3564,10 +3566,10 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
   var queued = false;
   function update() {
     queued = false;
-    var y = window.scrollY || 0, now = Date.now(), dt = now - lastT;
-    speed = dt > 0 && dt < 200 ? Math.abs(y - lastY) / dt : 0;   // px per ms
-    lastY = y;
-    lastT = now;
+    var y = window.scrollY || 0, now = Date.now(), dt = now - demoScrollT;
+    demoSpeed = dt > 0 && dt < 200 ? Math.abs(y - demoScrollY) / dt : 0;   // px per ms
+    demoScrollY = y;
+    demoScrollT = now;
     heroFx(y);
     navFx(y);
     spy();
