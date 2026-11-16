@@ -51,7 +51,7 @@
   --hero-b: #cbb8f7;
   --hero-c: #b2e6cd;
   --hero-d: #c3d2fb;
-  --hero-ink: #1b1840;
+  --hero-ink: #1f1f1f;
   --hero-accent: #7a52f0;
   --peek: clamp(130px, 16vh, 160px);   /* how much of the demos sheet shows on the first screen */
   /* liquid glass (top bar) */
@@ -59,8 +59,8 @@
   --glass-b: rgb(255 255 255 / 0.46);        /* tint, bottom */
   --glass-rim: rgb(255 255 255 / 0.95);      /* specular edge */
   --glass-rim-soft: rgb(255 255 255 / 0.45);
-  --glass-edge: rgb(24 24 60 / 0.09);        /* hairline that defines it on the light page */
-  --glass-shadow: rgb(24 22 60 / 0.2);
+  --glass-edge: rgb(20 20 20 / 0.09);        /* hairline that defines it on the light page */
+  --glass-shadow: rgb(20 20 20 / 0.2);
   --glass-lens: rgb(255 255 255 / 0.78);     /* the active-tab lens */
   --glass-hover: rgb(255 255 255 / 0.42);
   color-scheme: light;
@@ -79,12 +79,12 @@
     --chip-green: #0f3d1f;  --chip-green-ink: #a8dab5;
     --chip-blue: #0b3277;   --chip-blue-ink: #c2d7fb;
     --chip-purple: #33246b; --chip-purple-ink: #d8ccff;
-    --hero-base: #17172a;
+    --hero-base: #131314;
     --hero-a: #22386e;
     --hero-b: #3b2a72;
     --hero-c: #17483a;
     --hero-d: #2a3266;
-    --hero-ink: #eceaff;
+    --hero-ink: #e3e3e3;
     --hero-accent: #b9a6ff;
     --glass-a: rgb(58 58 68 / 0.55);
     --glass-b: rgb(30 30 38 / 0.45);
@@ -110,12 +110,12 @@
   --chip-green: #0f3d1f;  --chip-green-ink: #a8dab5;
   --chip-blue: #0b3277;   --chip-blue-ink: #c2d7fb;
   --chip-purple: #33246b; --chip-purple-ink: #d8ccff;
-  --hero-base: #17172a;
+  --hero-base: #131314;
     --hero-a: #22386e;
     --hero-b: #3b2a72;
     --hero-c: #17483a;
     --hero-d: #2a3266;
-    --hero-ink: #eceaff;
+    --hero-ink: #e3e3e3;
     --hero-accent: #b9a6ff;
     --glass-a: rgb(58 58 68 / 0.55);
     --glass-b: rgb(30 30 38 / 0.45);
@@ -317,10 +317,10 @@ html:not(.js) .tab[aria-current] { background: var(--glass-lens); }
   text-decoration: none;
   font-weight: 500;
   font-size: 0.88rem;
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.2), 0 4px 12px -6px rgb(20 18 60 / 0.6);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.2), 0 4px 12px -6px rgb(20 20 20 / 0.6);
   transition: background-color 0.25s ease;
 }
-.nav-cta:hover { background: color-mix(in srgb, var(--hero-ink) 86%, var(--hero-accent)); }
+.nav-cta:hover { background: color-mix(in srgb, var(--hero-ink) 86%, var(--bg)); }
 .nav-cta:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .theme-toggle {
   position: relative;

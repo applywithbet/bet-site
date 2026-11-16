@@ -52,7 +52,7 @@
   --hero-b: #cbb8f7;
   --hero-c: #b2e6cd;
   --hero-d: #c3d2fb;
-  --hero-ink: #1b1840;
+  --hero-ink: #1f1f1f;
   --hero-accent: #7a52f0;
   --peek: clamp(130px, 16vh, 160px);   /* how much of the demos sheet shows on the first screen */
   /* liquid glass (top bar) */
@@ -60,8 +60,8 @@
   --glass-b: rgb(255 255 255 / 0.46);        /* tint, bottom */
   --glass-rim: rgb(255 255 255 / 0.95);      /* specular edge */
   --glass-rim-soft: rgb(255 255 255 / 0.45);
-  --glass-edge: rgb(24 24 60 / 0.09);        /* hairline that defines it on the light page */
-  --glass-shadow: rgb(24 22 60 / 0.2);
+  --glass-edge: rgb(20 20 20 / 0.09);        /* hairline that defines it on the light page */
+  --glass-shadow: rgb(20 20 20 / 0.2);
   --glass-lens: rgb(255 255 255 / 0.78);     /* the active-tab lens */
   --glass-hover: rgb(255 255 255 / 0.42);
   color-scheme: light;
@@ -80,12 +80,12 @@
     --chip-green: #0f3d1f;  --chip-green-ink: #a8dab5;
     --chip-blue: #0b3277;   --chip-blue-ink: #c2d7fb;
     --chip-purple: #33246b; --chip-purple-ink: #d8ccff;
-    --hero-base: #17172a;
+    --hero-base: #131314;
     --hero-a: #22386e;
     --hero-b: #3b2a72;
     --hero-c: #17483a;
     --hero-d: #2a3266;
-    --hero-ink: #eceaff;
+    --hero-ink: #e3e3e3;
     --hero-accent: #b9a6ff;
     --glass-a: rgb(58 58 68 / 0.55);
     --glass-b: rgb(30 30 38 / 0.45);
@@ -111,12 +111,12 @@
   --chip-green: #0f3d1f;  --chip-green-ink: #a8dab5;
   --chip-blue: #0b3277;   --chip-blue-ink: #c2d7fb;
   --chip-purple: #33246b; --chip-purple-ink: #d8ccff;
-  --hero-base: #17172a;
+  --hero-base: #131314;
     --hero-a: #22386e;
     --hero-b: #3b2a72;
     --hero-c: #17483a;
     --hero-d: #2a3266;
-    --hero-ink: #eceaff;
+    --hero-ink: #e3e3e3;
     --hero-accent: #b9a6ff;
     --glass-a: rgb(58 58 68 / 0.55);
     --glass-b: rgb(30 30 38 / 0.45);
@@ -165,7 +165,7 @@ body {
   font-size: 1.02rem;
   line-height: 1.5;
   cursor: pointer;
-  box-shadow: 0 8px 22px -10px rgb(27 24 64 / 0.6);
+  box-shadow: 0 8px 22px -10px rgb(20 20 20 / 0.6);
   transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
 }
 .cta-arrow {
@@ -176,13 +176,13 @@ body {
   background: color-mix(in srgb, var(--hero-base) 18%, transparent);
   transition: transform 0.25s ease;
 }
-.cta:hover { transform: translateY(-1px); box-shadow: 0 12px 26px -10px rgb(27 24 64 / 0.7); }
+.cta:hover { transform: translateY(-1px); box-shadow: 0 12px 26px -10px rgb(20 20 20 / 0.7); }
 .cta:hover .cta-arrow { transform: translateY(2px); }
 .cta:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
 .cta-ghost {
   padding: 13px 26px;
   color: var(--hero-ink);
-  box-shadow: 0 6px 20px -14px rgb(27 24 64 / 0.4);
+  box-shadow: 0 6px 20px -14px rgb(20 20 20 / 0.4);
 }
 
 /* Bet */
@@ -353,10 +353,10 @@ html:not(.js) .tab[aria-current] { background: var(--glass-lens); }
   text-decoration: none;
   font-weight: 500;
   font-size: 0.88rem;
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.2), 0 4px 12px -6px rgb(20 18 60 / 0.6);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.2), 0 4px 12px -6px rgb(20 20 20 / 0.6);
   transition: background-color 0.25s ease;
 }
-.nav-cta:hover { background: color-mix(in srgb, var(--hero-ink) 86%, var(--hero-accent)); }
+.nav-cta:hover { background: color-mix(in srgb, var(--hero-ink) 86%, var(--bg)); }
 .nav-cta:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .theme-toggle {
   position: relative;
@@ -541,7 +541,7 @@ html:not(.js) .theme-toggle { display: none; }
 }
 .role-apply svg { width: 14px; height: 14px; transition: transform 0.25s ease; }
 .new-tab { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }   /* read out, not shown */
-.role:hover .role-apply { background: var(--hero-ink); color: var(--hero-base); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.2), 0 6px 16px -8px rgb(20 18 60 / 0.6); }
+.role:hover .role-apply { background: var(--hero-ink); color: var(--hero-base); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.2), 0 6px 16px -8px rgb(20 20 20 / 0.6); }
 .role:hover .role-apply svg { transform: translate(1px, -1px); }
 .dept-empty { margin: 0; padding: 20px 0 4px; color: var(--muted); font-size: 1rem; line-height: 1.6; }
 
@@ -846,6 +846,21 @@ html.lenis, html.lenis body { height: auto; }
 /* Book a demo: every "Book a demo" button links to demo.html, where the form lives. The arrow nudges forward. */
 button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inherit; cursor: pointer; }
 .cta[href="demo.html"]:hover .cta-arrow { transform: translateX(2px); }
+
+/* Team list: a 5x5 pixel icon before each name, on a 7x7 tile (the landing page's demo list). Grey until that
+   team is on screen, then its pixels turn blue one after another. */
+.dnav-item { display: flex; align-items: center; gap: 12px; overflow: visible; }
+.dnav-item .tx { position: relative; display: block; overflow: hidden; }
+.pi { flex: none; display: block; width: 21px; height: 21px; }
+.dnav-item .pi-t { fill: color-mix(in srgb, var(--ink) 6%, transparent); }
+.dnav-item .pi-p rect { fill: color-mix(in srgb, var(--ink) 26%, transparent); }
+.dnav-item:hover .pi-p rect { fill: color-mix(in srgb, var(--ink) 48%, transparent); }
+.dnav-item.is-on .pi-t { fill: var(--primary-soft); }
+.dnav-item.is-on .pi-p rect { fill: var(--primary); }
+@media (prefers-reduced-motion: no-preference) {
+  .dnav-item .pi-t { transition: fill 0.3s ease; }
+  .dnav-item .pi-p rect { transition: fill 0s linear calc(var(--i) * 30ms); }
+}
 </style>
 </head>
 <body>
@@ -967,11 +982,20 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
     var arrow = '<svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 10.5 10.5 3.5M5 3.5h5.5V9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
     var dot = '<span class="dot" aria-hidden="true">\u2022</span>';
     var navHtml = '', listHtml = '';
+    // A small pixel icon for each team (the landing page's demo list has the same)
+    var TEAM_ICON = {
+      "go-to-market": "<svg class=\"pi\" viewBox=\"0 0 7 7\" shape-rendering=\"crispEdges\" aria-hidden=\"true\"><rect class=\"pi-t\" width=\"7\" height=\"7\"/><g class=\"pi-p\"><rect x=\"4\" y=\"1\" width=\"1\" height=\"1\" style=\"--i:0\"/><rect x=\"5\" y=\"1\" width=\"1\" height=\"1\" style=\"--i:1\"/><rect x=\"2\" y=\"2\" width=\"1\" height=\"1\" style=\"--i:2\"/><rect x=\"3\" y=\"2\" width=\"1\" height=\"1\" style=\"--i:3\"/><rect x=\"4\" y=\"2\" width=\"1\" height=\"1\" style=\"--i:4\"/><rect x=\"5\" y=\"2\" width=\"1\" height=\"1\" style=\"--i:5\"/><rect x=\"1\" y=\"3\" width=\"1\" height=\"1\" style=\"--i:6\"/><rect x=\"2\" y=\"3\" width=\"1\" height=\"1\" style=\"--i:7\"/><rect x=\"3\" y=\"3\" width=\"1\" height=\"1\" style=\"--i:8\"/><rect x=\"4\" y=\"3\" width=\"1\" height=\"1\" style=\"--i:9\"/><rect x=\"5\" y=\"3\" width=\"1\" height=\"1\" style=\"--i:10\"/><rect x=\"2\" y=\"4\" width=\"1\" height=\"1\" style=\"--i:11\"/><rect x=\"3\" y=\"4\" width=\"1\" height=\"1\" style=\"--i:12\"/><rect x=\"4\" y=\"4\" width=\"1\" height=\"1\" style=\"--i:13\"/><rect x=\"5\" y=\"4\" width=\"1\" height=\"1\" style=\"--i:14\"/><rect x=\"4\" y=\"5\" width=\"1\" height=\"1\" style=\"--i:15\"/><rect x=\"5\" y=\"5\" width=\"1\" height=\"1\" style=\"--i:16\"/></g></svg>",
+      "engineering": "<svg class=\"pi\" viewBox=\"0 0 7 7\" shape-rendering=\"crispEdges\" aria-hidden=\"true\"><rect class=\"pi-t\" width=\"7\" height=\"7\"/><g class=\"pi-p\"><rect x=\"2\" y=\"2\" width=\"1\" height=\"1\" style=\"--i:0\"/><rect x=\"4\" y=\"2\" width=\"1\" height=\"1\" style=\"--i:1\"/><rect x=\"1\" y=\"3\" width=\"1\" height=\"1\" style=\"--i:2\"/><rect x=\"5\" y=\"3\" width=\"1\" height=\"1\" style=\"--i:3\"/><rect x=\"2\" y=\"4\" width=\"1\" height=\"1\" style=\"--i:4\"/><rect x=\"4\" y=\"4\" width=\"1\" height=\"1\" style=\"--i:5\"/></g></svg>",
+      "product": "<svg class=\"pi\" viewBox=\"0 0 7 7\" shape-rendering=\"crispEdges\" aria-hidden=\"true\"><rect class=\"pi-t\" width=\"7\" height=\"7\"/><g class=\"pi-p\"><rect x=\"3\" y=\"1\" width=\"1\" height=\"1\" style=\"--i:0\"/><rect x=\"2\" y=\"2\" width=\"1\" height=\"1\" style=\"--i:1\"/><rect x=\"3\" y=\"2\" width=\"1\" height=\"1\" style=\"--i:2\"/><rect x=\"4\" y=\"2\" width=\"1\" height=\"1\" style=\"--i:3\"/><rect x=\"2\" y=\"3\" width=\"1\" height=\"1\" style=\"--i:4\"/><rect x=\"3\" y=\"3\" width=\"1\" height=\"1\" style=\"--i:5\"/><rect x=\"4\" y=\"3\" width=\"1\" height=\"1\" style=\"--i:6\"/><rect x=\"1\" y=\"4\" width=\"1\" height=\"1\" style=\"--i:7\"/><rect x=\"2\" y=\"4\" width=\"1\" height=\"1\" style=\"--i:8\"/><rect x=\"3\" y=\"4\" width=\"1\" height=\"1\" style=\"--i:9\"/><rect x=\"4\" y=\"4\" width=\"1\" height=\"1\" style=\"--i:10\"/><rect x=\"5\" y=\"4\" width=\"1\" height=\"1\" style=\"--i:11\"/><rect x=\"1\" y=\"5\" width=\"1\" height=\"1\" style=\"--i:12\"/><rect x=\"3\" y=\"5\" width=\"1\" height=\"1\" style=\"--i:13\"/><rect x=\"5\" y=\"5\" width=\"1\" height=\"1\" style=\"--i:14\"/></g></svg>",
+      "design": "<svg class=\"pi\" viewBox=\"0 0 7 7\" shape-rendering=\"crispEdges\" aria-hidden=\"true\"><rect class=\"pi-t\" width=\"7\" height=\"7\"/><g class=\"pi-p\"><rect x=\"4\" y=\"1\" width=\"1\" height=\"1\" style=\"--i:0\"/><rect x=\"5\" y=\"1\" width=\"1\" height=\"1\" style=\"--i:1\"/><rect x=\"3\" y=\"2\" width=\"1\" height=\"1\" style=\"--i:2\"/><rect x=\"4\" y=\"2\" width=\"1\" height=\"1\" style=\"--i:3\"/><rect x=\"5\" y=\"2\" width=\"1\" height=\"1\" style=\"--i:4\"/><rect x=\"2\" y=\"3\" width=\"1\" height=\"1\" style=\"--i:5\"/><rect x=\"3\" y=\"3\" width=\"1\" height=\"1\" style=\"--i:6\"/><rect x=\"4\" y=\"3\" width=\"1\" height=\"1\" style=\"--i:7\"/><rect x=\"1\" y=\"4\" width=\"1\" height=\"1\" style=\"--i:8\"/><rect x=\"2\" y=\"4\" width=\"1\" height=\"1\" style=\"--i:9\"/><rect x=\"3\" y=\"4\" width=\"1\" height=\"1\" style=\"--i:10\"/><rect x=\"1\" y=\"5\" width=\"1\" height=\"1\" style=\"--i:11\"/><rect x=\"2\" y=\"5\" width=\"1\" height=\"1\" style=\"--i:12\"/></g></svg>",
+      "business-operations": "<svg class=\"pi\" viewBox=\"0 0 7 7\" shape-rendering=\"crispEdges\" aria-hidden=\"true\"><rect class=\"pi-t\" width=\"7\" height=\"7\"/><g class=\"pi-p\"><rect x=\"5\" y=\"1\" width=\"1\" height=\"1\" style=\"--i:0\"/><rect x=\"4\" y=\"2\" width=\"1\" height=\"1\" style=\"--i:1\"/><rect x=\"5\" y=\"2\" width=\"1\" height=\"1\" style=\"--i:2\"/><rect x=\"2\" y=\"3\" width=\"1\" height=\"1\" style=\"--i:3\"/><rect x=\"4\" y=\"3\" width=\"1\" height=\"1\" style=\"--i:4\"/><rect x=\"5\" y=\"3\" width=\"1\" height=\"1\" style=\"--i:5\"/><rect x=\"2\" y=\"4\" width=\"1\" height=\"1\" style=\"--i:6\"/><rect x=\"4\" y=\"4\" width=\"1\" height=\"1\" style=\"--i:7\"/><rect x=\"5\" y=\"4\" width=\"1\" height=\"1\" style=\"--i:8\"/><rect x=\"1\" y=\"5\" width=\"1\" height=\"1\" style=\"--i:9\"/><rect x=\"2\" y=\"5\" width=\"1\" height=\"1\" style=\"--i:10\"/><rect x=\"3\" y=\"5\" width=\"1\" height=\"1\" style=\"--i:11\"/><rect x=\"4\" y=\"5\" width=\"1\" height=\"1\" style=\"--i:12\"/><rect x=\"5\" y=\"5\" width=\"1\" height=\"1\" style=\"--i:13\"/></g></svg>",
+      "legal": "<svg class=\"pi\" viewBox=\"0 0 7 7\" shape-rendering=\"crispEdges\" aria-hidden=\"true\"><rect class=\"pi-t\" width=\"7\" height=\"7\"/><g class=\"pi-p\"><rect x=\"1\" y=\"1\" width=\"1\" height=\"1\" style=\"--i:0\"/><rect x=\"2\" y=\"1\" width=\"1\" height=\"1\" style=\"--i:1\"/><rect x=\"3\" y=\"1\" width=\"1\" height=\"1\" style=\"--i:2\"/><rect x=\"4\" y=\"1\" width=\"1\" height=\"1\" style=\"--i:3\"/><rect x=\"5\" y=\"1\" width=\"1\" height=\"1\" style=\"--i:4\"/><rect x=\"1\" y=\"2\" width=\"1\" height=\"1\" style=\"--i:5\"/><rect x=\"2\" y=\"2\" width=\"1\" height=\"1\" style=\"--i:6\"/><rect x=\"3\" y=\"2\" width=\"1\" height=\"1\" style=\"--i:7\"/><rect x=\"4\" y=\"2\" width=\"1\" height=\"1\" style=\"--i:8\"/><rect x=\"5\" y=\"2\" width=\"1\" height=\"1\" style=\"--i:9\"/><rect x=\"1\" y=\"3\" width=\"1\" height=\"1\" style=\"--i:10\"/><rect x=\"2\" y=\"3\" width=\"1\" height=\"1\" style=\"--i:11\"/><rect x=\"3\" y=\"3\" width=\"1\" height=\"1\" style=\"--i:12\"/><rect x=\"4\" y=\"3\" width=\"1\" height=\"1\" style=\"--i:13\"/><rect x=\"5\" y=\"3\" width=\"1\" height=\"1\" style=\"--i:14\"/><rect x=\"2\" y=\"4\" width=\"1\" height=\"1\" style=\"--i:15\"/><rect x=\"3\" y=\"4\" width=\"1\" height=\"1\" style=\"--i:16\"/><rect x=\"4\" y=\"4\" width=\"1\" height=\"1\" style=\"--i:17\"/><rect x=\"3\" y=\"5\" width=\"1\" height=\"1\" style=\"--i:18\"/></g></svg>"
+    };
     D.teams.forEach(function (t, i) {
       var roles = D.roles.filter(function (r) { return r.team === t.id; });
       var n = '<span class="n">' + roles.length + '</span>';
-      navHtml += '<a class="dnav-item' + (i ? '' : ' is-on') + '" href="#' + t.id + '"><span class="t off">' + esc(t.name) + n +
-                 '</span><span class="t on" aria-hidden="true">' + esc(t.name) + n + '</span></a>';
+      navHtml += '<a class="dnav-item' + (i ? '' : ' is-on') + '" href="#' + t.id + '">' + (TEAM_ICON[t.id] || '') + '<span class="tx"><span class="t off">' + esc(t.name) + n +
+                 '</span><span class="t on" aria-hidden="true">' + esc(t.name) + n + '</span></span></a>';
       listHtml += '<section class="dept ap" id="' + t.id + '" data-team="' + esc(t.name) + '"><div class="dept-head"><h3>' + esc(t.name) +
                   '</h3><p class="dept-count">' + roles.length + ' open</p></div>';
       if (!roles.length) {
