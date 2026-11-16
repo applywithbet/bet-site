@@ -23,6 +23,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;700&display=swap" rel="stylesheet">
 <script>document.documentElement.classList.add("js");</script>
 <script>(function(){var t=null;try{t=localStorage.getItem("bet-theme")}catch(e){}if(t!=="light"&&t!=="dark")t=window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.setAttribute("data-theme",t)})();</script>
+<meta name="theme-color" content="#f7f7f4">
+<!-- The browser bars and the overscroll area take the page colour (off-white / black), following the theme toggle -->
+<script>(function(){var d=document.documentElement,m=document.querySelector('meta[name="theme-color"]');function s(){m.setAttribute("content",d.getAttribute("data-theme")==="dark"?"#131314":"#f7f7f4")}s();new MutationObserver(s).observe(d,{attributes:true,attributeFilter:["data-theme"]})})();</script>
 <!-- Arriving from another page of the site (html.nav-in): the top bar is already on screen, so it doesn't drop in again -->
 <script>(function(){var d=document.documentElement,k="bet-nav";try{var t=+sessionStorage.getItem(k);sessionStorage.removeItem(k);if(t&&Date.now()-t<5000)d.classList.add("nav-in")}catch(e){}document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest("a[href]");if(!a||a.target||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;var u=new URL(a.href,location.href);if(u.protocol!==location.protocol||u.host!==location.host||u.pathname===location.pathname)return;try{sessionStorage.setItem(k,String(Date.now()))}catch(e){}},true)})();</script>
 <!-- Touch screens scroll natively (html.touch); mouse and trackpad viewers get Lenis smooth scrolling -->
@@ -129,6 +132,7 @@
 
 * { box-sizing: border-box; }
 html, body { margin: 0; }
+html { background: var(--bg); }   /* the overscroll area: off-white in light mode, black in dark */
 html { scroll-behavior: smooth; }
 body { position: relative; }
 .top-snap { position: absolute; top: 0; left: 0; width: 1px; height: 1px; scroll-snap-align: start; }
@@ -1549,6 +1553,10 @@ html.lenis, html.lenis body { height: auto; }
    (sticky) while the sheet slides up over it, and Bet keeps its place in the hero instead of travelling. */
 @media (prefers-reduced-motion: no-preference) {
   .touch .hero.stick { position: sticky; top: 0; }   /* "stick" is set by script only when the hero fits the screen */
+  /* iOS Safari colours its status bar and the overscroll area from a sticky element at the top edge, which would
+     be the lavender hero. Letting touches pass through the hero (not its headline and buttons) keeps it the page colour. */
+  .touch .hero.stick { pointer-events: none; }
+  .touch .hero.stick .hero-content { pointer-events: auto; }
 }
 .hero.is-past .blob, .hero.is-past .hero-mascot-fig { animation-play-state: paused; }   /* nothing animates once the sheet covers it */
 /* No demo ever shows a play button. Where the browser won't start a video by itself (Low Power Mode), the cover
@@ -1624,7 +1632,7 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
 .pocket-story { display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; }
 .pocket-stage { position: sticky; top: var(--ph-top); flex: 0 1 52%; min-width: 0; }
 .pocket-text { flex: 0 1 40%; max-width: 500px; min-width: 0; }
-.pocket-h {                    /* the demos heading's type ("The future of / applying to jobs"), two lines like it */
+.pocket-h {                    /* the demos heading's type ("Future of / applying to jobs"), two lines like it */
   margin: 0 0 8px;
   font-family: var(--font-display);
   font-weight: 500;
@@ -2290,7 +2298,7 @@ button.nav-cta, button.cta { border: 0; font-family: inherit; line-height: inher
     <div class="demos-grid">
       <aside class="intro ap ap-intro">
         <div class="intro-title">
-        <h2 class="intro-h">The future of <em>applying to jobs</em></h2>
+        <h2 class="intro-h">Future of <em>applying to jobs</em></h2>
         </div>
         <nav class="dnav" aria-label="Jump to a demo">
           <a class="dnav-item is-on" href="#first-screen"><svg class="pi" viewBox="0 0 7 7" shape-rendering="crispEdges" aria-hidden="true"><rect class="pi-t" width="7" height="7"/><g class="pi-p"><rect x="1" y="1" width="1" height="1" style="--i:0"/><rect x="2" y="1" width="1" height="1" style="--i:1"/><rect x="3" y="1" width="1" height="1" style="--i:2"/><rect x="4" y="1" width="1" height="1" style="--i:3"/><rect x="5" y="1" width="1" height="1" style="--i:4"/><rect x="1" y="2" width="1" height="1" style="--i:5"/><rect x="5" y="2" width="1" height="1" style="--i:6"/><rect x="1" y="3" width="1" height="1" style="--i:7"/><rect x="5" y="3" width="1" height="1" style="--i:8"/><rect x="1" y="4" width="1" height="1" style="--i:9"/><rect x="2" y="4" width="1" height="1" style="--i:10"/><rect x="3" y="4" width="1" height="1" style="--i:11"/><rect x="4" y="4" width="1" height="1" style="--i:12"/><rect x="5" y="4" width="1" height="1" style="--i:13"/><rect x="2" y="5" width="1" height="1" style="--i:14"/><rect x="3" y="5" width="1" height="1" style="--i:15"/><rect x="4" y="5" width="1" height="1" style="--i:16"/></g></svg><span class="tx"><span class="t off">The first screen</span><span class="t on" aria-hidden="true">The first screen</span></span></a>
