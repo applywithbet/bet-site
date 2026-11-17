@@ -22,6 +22,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;700&display=swap" rel="stylesheet">
 <script>document.documentElement.classList.add("js");</script>
+<!-- Pixel icons draw themselves in (html.px-draw); not with reduced motion -->
+<script>if(window.IntersectionObserver&&!(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches))document.documentElement.classList.add("px-draw");</script>
 <script>(function(){var t=null;try{t=localStorage.getItem("bet-theme")}catch(e){}if(t!=="light"&&t!=="dark")t=window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.setAttribute("data-theme",t)})();</script>
 <meta name="theme-color" content="#f7f7f4">
 <!-- The browser bars and the overscroll area take the page colour (off-white / black), following the theme toggle -->
@@ -344,14 +346,8 @@ html:not(.js) .tab[aria-current] { background: var(--glass-lens); }
 }
 .theme-toggle:hover { background: var(--glass-hover); color: var(--ink); }
 .theme-toggle:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
-.theme-toggle svg { grid-area: 1 / 1; width: 18px; height: 18px; }
-.theme-toggle .i-sun { opacity: 0; transform: rotate(90deg) scale(0.4); }
-:root[data-theme="dark"] .theme-toggle .i-sun { opacity: 1; transform: none; }
-:root[data-theme="dark"] .theme-toggle .i-moon { opacity: 0; transform: rotate(-90deg) scale(0.4); }
+.theme-toggle svg { grid-area: 1 / 1; width: 18px; height: 18px; }   /* pixel sun and moon, see "Pixel icons" */
 html:not(.js) .theme-toggle { display: none; }
-@media (prefers-reduced-motion: no-preference) {
-  .theme-toggle svg { transition: transform 0.6s cubic-bezier(0.34, 1.4, 0.64, 1), opacity 0.3s ease; }
-}
 @media (max-width: 560px) { .theme-toggle { width: 36px; height: 36px; margin-left: 0; } }
 ::view-transition-old(root),
 ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
@@ -480,6 +476,7 @@ html:not(.js) .theme-toggle { display: none; }
 .bk-send.is-full { width: 100%; justify-content: center; padding: 11px 24px; }
 .bk-done { align-content: center; justify-items: center; text-align: center; }   /* the panel keeps the form's height; this sits in the middle */
 .bk-done-mark { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: var(--primary-soft); color: var(--primary); }
+.bk-done-mark .pxi { width: 21px; height: 21px; }   /* the tick draws in pixel by pixel once the form is sent */
 .bk-done-title { margin: 0; font-family: var(--font-display); font-weight: var(--title-weight); font-size: 1.5rem; line-height: 1.2; letter-spacing: -0.025em; color: var(--ink); }
 .bk-done-title:focus { outline: none; }   /* it takes focus after sending, so screen readers start there */
 .bk-done-sub { margin: -14px 0 0; max-width: 40ch; color: var(--muted); font-size: 0.95rem; line-height: 1.5; text-wrap: pretty; }
@@ -550,9 +547,10 @@ html:not(.js) .theme-toggle { display: none; }
   cursor: pointer;
 }
 .faq-q button:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
-.faq-chev { flex: none; display: grid; place-items: center; width: 28px; height: 28px; color: var(--muted); transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), color 0.2s ease; }
+.faq-chev { flex: none; display: grid; place-items: center; width: 28px; height: 28px; color: var(--muted); transition: color 0.2s ease; }
 .faq-q button:hover .faq-chev { color: var(--ink); }
-.faq-item.is-open .faq-chev { transform: rotate(180deg); }
+.faq-chev .pxb rect, .faq-item.is-open .faq-chev .pxa rect { opacity: 0; }   /* down and up swap pixel by pixel */
+.faq-item.is-open .faq-chev .pxb rect { opacity: 1; }
 .faq-a-in { min-height: 0; overflow: hidden; }
 .faq-a p { margin: 0; padding: 0 30px 28px; max-width: 62ch; color: var(--muted); font-size: 0.98rem; line-height: 1.65; text-wrap: pretty; }
 .faq-a a { color: var(--ink); font-weight: 500; text-underline-offset: 3px; }
@@ -767,6 +765,34 @@ html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
 .lenis.lenis-stopped { overflow: hidden; }
 .lenis.lenis-smooth iframe { pointer-events: none; }
+
+/* Pixel icons. Every icon on the site is pixel art: the 5x5 icons on a tile (.pi) and the plain glyphs in
+   buttons (.pxi: a 7x7 or 9x9 grid, 2px pixels at their usual size). Each pixel has a place in the drawing
+   order (--i), and the icons move a pixel at a time, like the demo list: they draw themselves in the first time
+   they come into view (html.px-draw, see the script at the end; never in the top bar), a button's glyph turns
+   blue pixel by pixel while you point at it, a tile icon redraws when you point at its card, and swaps (sun and
+   moon, copy and tick, open and closed) go pixel by pixel. With reduced motion they are simply there. */
+:root { --primary-inv: #a8c7fa; }      /* a blue that reads on the dark pill buttons: the other theme's primary */
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --primary-inv: #0b57d0; } }
+:root[data-theme="dark"] { --primary-inv: #0b57d0; }
+.pxi { flex: none; display: block; width: 14px; height: 14px; overflow: visible; }
+.pxi rect { fill: currentColor; }
+.theme-toggle .i-sun rect, :root[data-theme="dark"] .theme-toggle .i-moon rect { opacity: 0; }
+:root[data-theme="dark"] .theme-toggle .i-sun rect { opacity: 1; }
+@media (prefers-reduced-motion: no-preference) {
+  .pi .pi-p rect, .pxi rect {
+    transition: opacity 0s linear calc(var(--i) * var(--pxs, 30ms)), fill 0s linear calc(var(--i) * var(--pxs, 30ms));
+  }
+  html.px-draw .pi:not(.is-drawn) .pi-p rect, html.px-draw .pxi:not(.is-drawn) rect { opacity: 0; }
+}
+@media (hover: hover) {
+  .theme-toggle:hover .pxi rect, .faq-q button:hover .pxi rect, .jp-back:hover .pxi rect, .f-upload:hover .pxi rect { fill: var(--primary); }
+  .cta:hover .pxi rect, .inbox:hover .pxi rect, .role:hover .pxi rect { fill: var(--primary-inv); }
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .fc-card:hover .pi .pi-p rect, .tile:hover .pi .pi-p rect { animation: px-redraw 1ms calc(var(--i) * var(--pxs, 30ms)) backwards; }
+}
+@keyframes px-redraw { from, to { opacity: 0; } }
 </style>
 </head>
 <body>
@@ -780,7 +806,7 @@ html.lenis, html.lenis body { height: auto; }
     <a class="tab" href="index.html#contact"><span class="lbl" data-label="Contact">Contact</span></a>
     <a class="tab" href="careers.html"><span class="lbl" data-label="Careers">Careers</span></a>
   </div>
-  <button class="theme-toggle" type="button" aria-label="Switch to light mode"><svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  <button class="theme-toggle" type="button" aria-label="Switch to light mode"><svg class="pxi i-sun is-drawn" viewBox="0 0 9 9" shape-rendering="crispEdges" aria-hidden="true" style="--pxs:14ms"><rect x="4" y="4" width="1" height="1" style="--i:0"/><rect x="4" y="3" width="1" height="1" style="--i:1"/><rect x="5" y="4" width="1" height="1" style="--i:2"/><rect x="4" y="5" width="1" height="1" style="--i:3"/><rect x="3" y="4" width="1" height="1" style="--i:4"/><rect x="3" y="3" width="1" height="1" style="--i:5"/><rect x="5" y="3" width="1" height="1" style="--i:6"/><rect x="5" y="5" width="1" height="1" style="--i:7"/><rect x="3" y="5" width="1" height="1" style="--i:8"/><rect x="4" y="2" width="1" height="1" style="--i:9"/><rect x="6" y="4" width="1" height="1" style="--i:10"/><rect x="4" y="6" width="1" height="1" style="--i:11"/><rect x="2" y="4" width="1" height="1" style="--i:12"/><rect x="2" y="3" width="1" height="1" style="--i:13"/><rect x="3" y="2" width="1" height="1" style="--i:14"/><rect x="5" y="2" width="1" height="1" style="--i:15"/><rect x="6" y="3" width="1" height="1" style="--i:16"/><rect x="6" y="5" width="1" height="1" style="--i:17"/><rect x="5" y="6" width="1" height="1" style="--i:18"/><rect x="3" y="6" width="1" height="1" style="--i:19"/><rect x="2" y="5" width="1" height="1" style="--i:20"/><rect x="4" y="0" width="1" height="1" style="--i:21"/><rect x="8" y="4" width="1" height="1" style="--i:22"/><rect x="4" y="8" width="1" height="1" style="--i:23"/><rect x="0" y="4" width="1" height="1" style="--i:24"/><rect x="1" y="1" width="1" height="1" style="--i:25"/><rect x="7" y="1" width="1" height="1" style="--i:26"/><rect x="7" y="7" width="1" height="1" style="--i:27"/><rect x="1" y="7" width="1" height="1" style="--i:28"/></svg><svg class="pxi i-moon is-drawn" viewBox="0 0 9 9" shape-rendering="crispEdges" aria-hidden="true" style="--pxs:14ms"><rect x="2" y="1" width="1" height="1" style="--i:0"/><rect x="3" y="1" width="1" height="1" style="--i:1"/><rect x="4" y="1" width="1" height="1" style="--i:2"/><rect x="1" y="2" width="1" height="1" style="--i:3"/><rect x="2" y="2" width="1" height="1" style="--i:4"/><rect x="3" y="2" width="1" height="1" style="--i:5"/><rect x="0" y="3" width="1" height="1" style="--i:6"/><rect x="1" y="3" width="1" height="1" style="--i:7"/><rect x="2" y="3" width="1" height="1" style="--i:8"/><rect x="0" y="4" width="1" height="1" style="--i:9"/><rect x="1" y="4" width="1" height="1" style="--i:10"/><rect x="2" y="4" width="1" height="1" style="--i:11"/><rect x="0" y="5" width="1" height="1" style="--i:12"/><rect x="1" y="5" width="1" height="1" style="--i:13"/><rect x="2" y="5" width="1" height="1" style="--i:14"/><rect x="8" y="5" width="1" height="1" style="--i:15"/><rect x="0" y="6" width="1" height="1" style="--i:16"/><rect x="1" y="6" width="1" height="1" style="--i:17"/><rect x="2" y="6" width="1" height="1" style="--i:18"/><rect x="3" y="6" width="1" height="1" style="--i:19"/><rect x="7" y="6" width="1" height="1" style="--i:20"/><rect x="8" y="6" width="1" height="1" style="--i:21"/><rect x="1" y="7" width="1" height="1" style="--i:22"/><rect x="2" y="7" width="1" height="1" style="--i:23"/><rect x="3" y="7" width="1" height="1" style="--i:24"/><rect x="4" y="7" width="1" height="1" style="--i:25"/><rect x="5" y="7" width="1" height="1" style="--i:26"/><rect x="6" y="7" width="1" height="1" style="--i:27"/><rect x="7" y="7" width="1" height="1" style="--i:28"/><rect x="2" y="8" width="1" height="1" style="--i:29"/><rect x="3" y="8" width="1" height="1" style="--i:30"/><rect x="4" y="8" width="1" height="1" style="--i:31"/><rect x="5" y="8" width="1" height="1" style="--i:32"/><rect x="6" y="8" width="1" height="1" style="--i:33"/></svg></button>
   <a class="nav-cta" href="demo.html" aria-current="page">Book a demo</a>
 </nav>
 <svg class="lg-defs" aria-hidden="true" focusable="false"></svg>
@@ -823,15 +849,15 @@ html.lenis, html.lenis body { height: auto; }
           </div>
           <div class="bk-honey" aria-hidden="true"><label for="bk-honey">Leave this empty</label><input id="bk-honey" name="_honey" type="text" tabindex="-1" autocomplete="off"></div>
           <div class="bk-actions">
-            <button class="cta bk-send is-full" type="submit"><span class="bk-send-lbl">Book a demo</span><span class="cta-arrow" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7h10M7.5 2.5 12 7l-4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+            <button class="cta bk-send is-full" type="submit"><span class="bk-send-lbl">Book a demo</span><span class="cta-arrow" aria-hidden="true"><svg class="pxi" viewBox="0 0 7 7" shape-rendering="crispEdges" aria-hidden="true"><rect x="0" y="3" width="1" height="1" style="--i:0"/><rect x="1" y="3" width="1" height="1" style="--i:1"/><rect x="2" y="3" width="1" height="1" style="--i:2"/><rect x="3" y="0" width="1" height="1" style="--i:3"/><rect x="3" y="1" width="1" height="1" style="--i:4"/><rect x="3" y="3" width="1" height="1" style="--i:5"/><rect x="3" y="5" width="1" height="1" style="--i:6"/><rect x="3" y="6" width="1" height="1" style="--i:7"/><rect x="4" y="1" width="1" height="1" style="--i:8"/><rect x="4" y="2" width="1" height="1" style="--i:9"/><rect x="4" y="3" width="1" height="1" style="--i:10"/><rect x="4" y="4" width="1" height="1" style="--i:11"/><rect x="4" y="5" width="1" height="1" style="--i:12"/><rect x="5" y="2" width="1" height="1" style="--i:13"/><rect x="5" y="3" width="1" height="1" style="--i:14"/><rect x="5" y="4" width="1" height="1" style="--i:15"/><rect x="6" y="3" width="1" height="1" style="--i:16"/></svg></span></button>
             <p class="bk-status" role="alert"></p>
           </div>
         </form>
         <div class="bk-done" hidden>
-          <span class="bk-done-mark" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M5.5 12.5 10 17l8.5-9.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="bk-done-mark" aria-hidden="true"><svg class="pxi" viewBox="0 0 7 7" shape-rendering="crispEdges" aria-hidden="true" style="--pxs:45ms"><rect x="0" y="3" width="1" height="1" style="--i:0"/><rect x="1" y="3" width="1" height="1" style="--i:1"/><rect x="1" y="4" width="1" height="1" style="--i:2"/><rect x="2" y="4" width="1" height="1" style="--i:3"/><rect x="2" y="5" width="1" height="1" style="--i:4"/><rect x="3" y="3" width="1" height="1" style="--i:5"/><rect x="3" y="4" width="1" height="1" style="--i:6"/><rect x="4" y="2" width="1" height="1" style="--i:7"/><rect x="4" y="3" width="1" height="1" style="--i:8"/><rect x="5" y="1" width="1" height="1" style="--i:9"/><rect x="5" y="2" width="1" height="1" style="--i:10"/><rect x="6" y="1" width="1" height="1" style="--i:11"/></svg></span>
           <h2 class="bk-done-title" tabindex="-1">You’re on the list.</h2>
           <p class="bk-done-sub"></p>
-          <a class="cta" href="index.html">Okay, bet.<span class="cta-arrow" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7h10M7.5 2.5 12 7l-4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
+          <a class="cta" href="index.html">Okay, bet.<span class="cta-arrow" aria-hidden="true"><svg class="pxi" viewBox="0 0 7 7" shape-rendering="crispEdges" aria-hidden="true"><rect x="0" y="3" width="1" height="1" style="--i:0"/><rect x="1" y="3" width="1" height="1" style="--i:1"/><rect x="2" y="3" width="1" height="1" style="--i:2"/><rect x="3" y="0" width="1" height="1" style="--i:3"/><rect x="3" y="1" width="1" height="1" style="--i:4"/><rect x="3" y="3" width="1" height="1" style="--i:5"/><rect x="3" y="5" width="1" height="1" style="--i:6"/><rect x="3" y="6" width="1" height="1" style="--i:7"/><rect x="4" y="1" width="1" height="1" style="--i:8"/><rect x="4" y="2" width="1" height="1" style="--i:9"/><rect x="4" y="3" width="1" height="1" style="--i:10"/><rect x="4" y="4" width="1" height="1" style="--i:11"/><rect x="4" y="5" width="1" height="1" style="--i:12"/><rect x="5" y="2" width="1" height="1" style="--i:13"/><rect x="5" y="3" width="1" height="1" style="--i:14"/><rect x="5" y="4" width="1" height="1" style="--i:15"/><rect x="6" y="3" width="1" height="1" style="--i:16"/></svg></span></a>
         </div>
       </div>
     </div>
@@ -843,23 +869,23 @@ html.lenis, html.lenis body { height: auto; }
     <h2 class="faq-title" id="faq-title">Frequently asked questions</h2>
     <div class="faq-list ap">
       <div class="faq-item is-open">
-        <h3 class="faq-q"><button type="button" id="faq-q1" aria-expanded="true" aria-controls="faq-a1"><span>What is Bet?</span><span class="faq-chev" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3.5 6 8 10.5 12.5 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button></h3>
+        <h3 class="faq-q"><button type="button" id="faq-q1" aria-expanded="true" aria-controls="faq-a1"><span>What is Bet?</span><span class="faq-chev" aria-hidden="true"><svg class="pxi" viewBox="0 0 7 7" shape-rendering="crispEdges" aria-hidden="true"><g class="pxa"><rect x="0" y="1" width="1" height="1" style="--i:0"/><rect x="0" y="2" width="1" height="1" style="--i:1"/><rect x="1" y="2" width="1" height="1" style="--i:2"/><rect x="1" y="3" width="1" height="1" style="--i:3"/><rect x="2" y="3" width="1" height="1" style="--i:4"/><rect x="2" y="4" width="1" height="1" style="--i:5"/><rect x="3" y="4" width="1" height="1" style="--i:6"/><rect x="3" y="5" width="1" height="1" style="--i:7"/><rect x="4" y="3" width="1" height="1" style="--i:8"/><rect x="4" y="4" width="1" height="1" style="--i:9"/><rect x="5" y="2" width="1" height="1" style="--i:10"/><rect x="5" y="3" width="1" height="1" style="--i:11"/><rect x="6" y="1" width="1" height="1" style="--i:12"/><rect x="6" y="2" width="1" height="1" style="--i:13"/></g><g class="pxb"><rect x="0" y="4" width="1" height="1" style="--i:0"/><rect x="0" y="5" width="1" height="1" style="--i:1"/><rect x="1" y="3" width="1" height="1" style="--i:2"/><rect x="1" y="4" width="1" height="1" style="--i:3"/><rect x="2" y="2" width="1" height="1" style="--i:4"/><rect x="2" y="3" width="1" height="1" style="--i:5"/><rect x="3" y="1" width="1" height="1" style="--i:6"/><rect x="3" y="2" width="1" height="1" style="--i:7"/><rect x="4" y="2" width="1" height="1" style="--i:8"/><rect x="4" y="3" width="1" height="1" style="--i:9"/><rect x="5" y="3" width="1" height="1" style="--i:10"/><rect x="5" y="4" width="1" height="1" style="--i:11"/><rect x="6" y="4" width="1" height="1" style="--i:12"/><rect x="6" y="5" width="1" height="1" style="--i:13"/></g></svg></span></button></h3>
         <div class="faq-a" id="faq-a1" role="region" aria-labelledby="faq-q1"><div class="faq-a-in"><p>A job board that applies for you. Import your resume, answer a few questions, and Bet builds your dashboard with 20 jobs a day picked for you. New jobs come in every hour.</p></div></div>
       </div>
       <div class="faq-item">
-        <h3 class="faq-q"><button type="button" id="faq-q2" aria-expanded="false" aria-controls="faq-a2"><span>How does it apply for me?</span><span class="faq-chev" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3.5 6 8 10.5 12.5 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button></h3>
+        <h3 class="faq-q"><button type="button" id="faq-q2" aria-expanded="false" aria-controls="faq-a2"><span>How does it apply for me?</span><span class="faq-chev" aria-hidden="true"><svg class="pxi" viewBox="0 0 7 7" shape-rendering="crispEdges" aria-hidden="true"><g class="pxa"><rect x="0" y="1" width="1" height="1" style="--i:0"/><rect x="0" y="2" width="1" height="1" style="--i:1"/><rect x="1" y="2" width="1" height="1" style="--i:2"/><rect x="1" y="3" width="1" height="1" style="--i:3"/><rect x="2" y="3" width="1" height="1" style="--i:4"/><rect x="2" y="4" width="1" height="1" style="--i:5"/><rect x="3" y="4" width="1" height="1" style="--i:6"/><rect x="3" y="5" width="1" height="1" style="--i:7"/><rect x="4" y="3" width="1" height="1" style="--i:8"/><rect x="4" y="4" width="1" height="1" style="--i:9"/><rect x="5" y="2" width="1" height="1" style="--i:10"/><rect x="5" y="3" width="1" height="1" style="--i:11"/><rect x="6" y="1" width="1" height="1" style="--i:12"/><rect x="6" y="2" width="1" height="1" style="--i:13"/></g><g class="pxb"><rect x="0" y="4" width="1" height="1" style="--i:0"/><rect x="0" y="5" width="1" height="1" style="--i:1"/><rect x="1" y="3" width="1" height="1" style="--i:2"/><rect x="1" y="4" width="1" height="1" style="--i:3"/><rect x="2" y="2" width="1" height="1" style="--i:4"/><rect x="2" y="3" width="1" height="1" style="--i:5"/><rect x="3" y="1" width="1" height="1" style="--i:6"/><rect x="3" y="2" width="1" height="1" style="--i:7"/><rect x="4" y="2" width="1" height="1" style="--i:8"/><rect x="4" y="3" width="1" height="1" style="--i:9"/><rect x="5" y="3" width="1" height="1" style="--i:10"/><rect x="5" y="4" width="1" height="1" style="--i:11"/><rect x="6" y="4" width="1" height="1" style="--i:12"/><rect x="6" y="5" width="1" height="1" style="--i:13"/></g></svg></span></button></h3>
         <div class="faq-a" id="faq-a2" role="region" aria-labelledby="faq-q2"><div class="faq-a-in"><p>Press Apply with autofill and Bet’s Chrome extension fills out the application from your resume. It takes about a minute, and under 10 seconds on some sites. You look it over and submit.</p></div></div>
       </div>
       <div class="faq-item">
-        <h3 class="faq-q"><button type="button" id="faq-q3" aria-expanded="false" aria-controls="faq-a3"><span>Which application sites does it work on?</span><span class="faq-chev" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3.5 6 8 10.5 12.5 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button></h3>
+        <h3 class="faq-q"><button type="button" id="faq-q3" aria-expanded="false" aria-controls="faq-a3"><span>Which application sites does it work on?</span><span class="faq-chev" aria-hidden="true"><svg class="pxi" viewBox="0 0 7 7" shape-rendering="crispEdges" aria-hidden="true"><g class="pxa"><rect x="0" y="1" width="1" height="1" style="--i:0"/><rect x="0" y="2" width="1" height="1" style="--i:1"/><rect x="1" y="2" width="1" height="1" style="--i:2"/><rect x="1" y="3" width="1" height="1" style="--i:3"/><rect x="2" y="3" width="1" height="1" style="--i:4"/><rect x="2" y="4" width="1" height="1" style="--i:5"/><rect x="3" y="4" width="1" height="1" style="--i:6"/><rect x="3" y="5" width="1" height="1" style="--i:7"/><rect x="4" y="3" width="1" height="1" style="--i:8"/><rect x="4" y="4" width="1" height="1" style="--i:9"/><rect x="5" y="2" width="1" height="1" style="--i:10"/><rect x="5" y="3" width="1" height="1" style="--i:11"/><rect x="6" y="1" width="1" height="1" style="--i:12"/><rect x="6" y="2" width="1" height="1" style="--i:13"/></g><g class="pxb"><rect x="0" y="4" width="1" height="1" style="--i:0"/><rect x="0" y="5" width="1" height="1" style="--i:1"/><rect x="1" y="3" width="1" height="1" style="--i:2"/><rect x="1" y="4" width="1" height="1" style="--i:3"/><rect x="2" y="2" width="1" height="1" style="--i:4"/><rect x="2" y="3" width="1" height="1" style="--i:5"/><rect x="3" y="1" width="1" height="1" style="--i:6"/><rect x="3" y="2" width="1" height="1" style="--i:7"/><rect x="4" y="2" width="1" height="1" style="--i:8"/><rect x="4" y="3" width="1" height="1" style="--i:9"/><rect x="5" y="3" width="1" height="1" style="--i:10"/><rect x="5" y="4" width="1" height="1" style="--i:11"/><rect x="6" y="4" width="1" height="1" style="--i:12"/><rect x="6" y="5" width="1" height="1" style="--i:13"/></g></svg></span></button></h3>
         <div class="faq-a" id="faq-a3" role="region" aria-labelledby="faq-q3"><div class="faq-a-in"><p>Greenhouse, Workday, Lever, Ashby, iCIMS, Taleo, SuccessFactors, LinkedIn and company career sites.</p></div></div>
       </div>
       <div class="faq-item">
-        <h3 class="faq-q"><button type="button" id="faq-q4" aria-expanded="false" aria-controls="faq-a4"><span>What happens after I book?</span><span class="faq-chev" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3.5 6 8 10.5 12.5 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button></h3>
+        <h3 class="faq-q"><button type="button" id="faq-q4" aria-expanded="false" aria-controls="faq-a4"><span>What happens after I book?</span><span class="faq-chev" aria-hidden="true"><svg class="pxi" viewBox="0 0 7 7" shape-rendering="crispEdges" aria-hidden="true"><g class="pxa"><rect x="0" y="1" width="1" height="1" style="--i:0"/><rect x="0" y="2" width="1" height="1" style="--i:1"/><rect x="1" y="2" width="1" height="1" style="--i:2"/><rect x="1" y="3" width="1" height="1" style="--i:3"/><rect x="2" y="3" width="1" height="1" style="--i:4"/><rect x="2" y="4" width="1" height="1" style="--i:5"/><rect x="3" y="4" width="1" height="1" style="--i:6"/><rect x="3" y="5" width="1" height="1" style="--i:7"/><rect x="4" y="3" width="1" height="1" style="--i:8"/><rect x="4" y="4" width="1" height="1" style="--i:9"/><rect x="5" y="2" width="1" height="1" style="--i:10"/><rect x="5" y="3" width="1" height="1" style="--i:11"/><rect x="6" y="1" width="1" height="1" style="--i:12"/><rect x="6" y="2" width="1" height="1" style="--i:13"/></g><g class="pxb"><rect x="0" y="4" width="1" height="1" style="--i:0"/><rect x="0" y="5" width="1" height="1" style="--i:1"/><rect x="1" y="3" width="1" height="1" style="--i:2"/><rect x="1" y="4" width="1" height="1" style="--i:3"/><rect x="2" y="2" width="1" height="1" style="--i:4"/><rect x="2" y="3" width="1" height="1" style="--i:5"/><rect x="3" y="1" width="1" height="1" style="--i:6"/><rect x="3" y="2" width="1" height="1" style="--i:7"/><rect x="4" y="2" width="1" height="1" style="--i:8"/><rect x="4" y="3" width="1" height="1" style="--i:9"/><rect x="5" y="3" width="1" height="1" style="--i:10"/><rect x="5" y="4" width="1" height="1" style="--i:11"/><rect x="6" y="4" width="1" height="1" style="--i:12"/><rect x="6" y="5" width="1" height="1" style="--i:13"/></g></svg></span></button></h3>
         <div class="faq-a" id="faq-a4" role="region" aria-labelledby="faq-q4"><div class="faq-a-in"><p>We’ll email you to find a time that works. If you’d rather write to us first, we’re at <a href="mailto:applywithbet@gmail.com">applywithbet@gmail.com</a>.</p></div></div>
       </div>
       <div class="faq-item">
-        <h3 class="faq-q"><button type="button" id="faq-q5" aria-expanded="false" aria-controls="faq-a5"><span>What do you do with my details?</span><span class="faq-chev" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3.5 6 8 10.5 12.5 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button></h3>
+        <h3 class="faq-q"><button type="button" id="faq-q5" aria-expanded="false" aria-controls="faq-a5"><span>What do you do with my details?</span><span class="faq-chev" aria-hidden="true"><svg class="pxi" viewBox="0 0 7 7" shape-rendering="crispEdges" aria-hidden="true"><g class="pxa"><rect x="0" y="1" width="1" height="1" style="--i:0"/><rect x="0" y="2" width="1" height="1" style="--i:1"/><rect x="1" y="2" width="1" height="1" style="--i:2"/><rect x="1" y="3" width="1" height="1" style="--i:3"/><rect x="2" y="3" width="1" height="1" style="--i:4"/><rect x="2" y="4" width="1" height="1" style="--i:5"/><rect x="3" y="4" width="1" height="1" style="--i:6"/><rect x="3" y="5" width="1" height="1" style="--i:7"/><rect x="4" y="3" width="1" height="1" style="--i:8"/><rect x="4" y="4" width="1" height="1" style="--i:9"/><rect x="5" y="2" width="1" height="1" style="--i:10"/><rect x="5" y="3" width="1" height="1" style="--i:11"/><rect x="6" y="1" width="1" height="1" style="--i:12"/><rect x="6" y="2" width="1" height="1" style="--i:13"/></g><g class="pxb"><rect x="0" y="4" width="1" height="1" style="--i:0"/><rect x="0" y="5" width="1" height="1" style="--i:1"/><rect x="1" y="3" width="1" height="1" style="--i:2"/><rect x="1" y="4" width="1" height="1" style="--i:3"/><rect x="2" y="2" width="1" height="1" style="--i:4"/><rect x="2" y="3" width="1" height="1" style="--i:5"/><rect x="3" y="1" width="1" height="1" style="--i:6"/><rect x="3" y="2" width="1" height="1" style="--i:7"/><rect x="4" y="2" width="1" height="1" style="--i:8"/><rect x="4" y="3" width="1" height="1" style="--i:9"/><rect x="5" y="3" width="1" height="1" style="--i:10"/><rect x="5" y="4" width="1" height="1" style="--i:11"/><rect x="6" y="4" width="1" height="1" style="--i:12"/><rect x="6" y="5" width="1" height="1" style="--i:13"/></g></svg></span></button></h3>
         <div class="faq-a" id="faq-a5" role="region" aria-labelledby="faq-q5"><div class="faq-a-in"><p>We use them only to set up your demo and follow up about Bet. We don’t sell your details or share them with anyone else, and we’ll delete them whenever you ask. <a href="privacy.html">Read the Privacy Policy</a>.</p></div></div>
       </div>
     </div>
@@ -871,7 +897,7 @@ html.lenis, html.lenis body { height: auto; }
     </div>
     <div class="more-copy ap">
       <h2 class="more-title" id="more-title">See how it works</h2>
-      <a class="cta" href="index.html#demos">Watch the videos<span class="cta-arrow" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7h10M7.5 2.5 12 7l-4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
+      <a class="cta" href="index.html#demos">Watch the videos<span class="cta-arrow" aria-hidden="true"><svg class="pxi" viewBox="0 0 7 7" shape-rendering="crispEdges" aria-hidden="true"><rect x="0" y="3" width="1" height="1" style="--i:0"/><rect x="1" y="3" width="1" height="1" style="--i:1"/><rect x="2" y="3" width="1" height="1" style="--i:2"/><rect x="3" y="0" width="1" height="1" style="--i:3"/><rect x="3" y="1" width="1" height="1" style="--i:4"/><rect x="3" y="3" width="1" height="1" style="--i:5"/><rect x="3" y="5" width="1" height="1" style="--i:6"/><rect x="3" y="6" width="1" height="1" style="--i:7"/><rect x="4" y="1" width="1" height="1" style="--i:8"/><rect x="4" y="2" width="1" height="1" style="--i:9"/><rect x="4" y="3" width="1" height="1" style="--i:10"/><rect x="4" y="4" width="1" height="1" style="--i:11"/><rect x="4" y="5" width="1" height="1" style="--i:12"/><rect x="5" y="2" width="1" height="1" style="--i:13"/><rect x="5" y="3" width="1" height="1" style="--i:14"/><rect x="5" y="4" width="1" height="1" style="--i:15"/><rect x="6" y="3" width="1" height="1" style="--i:16"/></svg></span></a>
     </div>
   </section>
   </div>
@@ -1350,6 +1376,27 @@ html.lenis, html.lenis body { height: auto; }
       );
     }).catch(function () {});
   });
+})();
+</script>
+<script>
+// Pixel icons (see "Pixel icons" in the styles): each one draws itself in, pixel by pixel, the first time most
+// of it is on screen. Icons a script adds later (the careers list) are picked up as they arrive.
+(function () {
+  if (!document.documentElement.classList.contains('px-draw')) return;
+  var io = new IntersectionObserver(function (es) {
+    es.forEach(function (e) {
+      if (e.isIntersecting && e.intersectionRatio >= 0.6) { e.target.classList.add('is-drawn'); io.unobserve(e.target); }
+    });
+  }, { threshold: [0.6] });
+  var SEL = 'svg.pi:not(.is-drawn), svg.pxi:not(.is-drawn)';
+  function watch(n) {
+    if (n.matches && n.matches(SEL)) io.observe(n);
+    if (n.querySelectorAll) n.querySelectorAll(SEL).forEach(function (el) { io.observe(el); });
+  }
+  watch(document);
+  new MutationObserver(function (ms) {
+    ms.forEach(function (m) { m.addedNodes.forEach(function (n) { if (n.nodeType === 1) watch(n); }); });
+  }).observe(document.body, { childList: true, subtree: true });
 })();
 </script>
 </body>

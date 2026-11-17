@@ -19,6 +19,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;700&display=swap" rel="stylesheet">
 <script>document.documentElement.classList.add("js");</script>
+<!-- Pixel icons draw themselves in (html.px-draw); not with reduced motion -->
+<script>if(window.IntersectionObserver&&!(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches))document.documentElement.classList.add("px-draw");</script>
 <script>(function(){var t=null;try{t=localStorage.getItem("bet-theme")}catch(e){}if(t!=="light"&&t!=="dark")t=window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.setAttribute("data-theme",t)})();</script>
 <meta name="theme-color" content="#f7f7f4">
 <!-- The browser bars and the overscroll area take the page colour (off-white / black), following the theme toggle -->
@@ -175,7 +177,7 @@ body {
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 .jp-back:hover { background: var(--tint); color: var(--ink); }
-.jp-back svg { width: 22px; height: 22px; }
+.jp-back svg { width: 21px; height: 21px; }
 .jp-logo {
   display: inline-flex;
   align-items: center;
@@ -349,7 +351,7 @@ textarea.f-input { min-height: 120px; resize: vertical; line-height: 1.55; }
   appearance: none;
   -webkit-appearance: none;
   padding-right: 42px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath d='M3 5.5 7 9.5l4-4' fill='none' stroke='%23888' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 7 7' shape-rendering='crispEdges'%3E%3Cpath d='M0 1h1v1H0zM6 1h1v1H6zM0 2h1v1H0zM1 2h1v1H1zM5 2h1v1H5zM6 2h1v1H6zM1 3h1v1H1zM2 3h1v1H2zM4 3h1v1H4zM5 3h1v1H5zM2 4h1v1H2zM3 4h1v1H3zM4 4h1v1H4zM3 5h1v1H3z' fill='%23888'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 15px center;
   cursor: pointer;
@@ -391,12 +393,12 @@ textarea.f-input { min-height: 120px; resize: vertical; line-height: 1.55; }
   transition: box-shadow 0.2s ease;
 }
 .f-upload:hover { box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--ink) 40%, transparent), 0 4px 12px -8px rgb(20 20 20 / 0.4); }
-.f-upload svg { width: 16px; height: 16px; color: var(--ink); }
+.f-upload svg { width: 14px; height: 14px; color: var(--ink); }
 .f-file:focus-visible + .f-drop-empty .f-upload { outline: 2px solid var(--primary); outline-offset: 3px; }
 .f-drop-or { color: var(--muted); font-size: 0.95rem; }
 .f-drop-file { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .f-file-icon { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; background: var(--tint); color: var(--ink); }
-.f-file-icon svg { width: 20px; height: 20px; }
+.f-file-icon svg { width: 18px; height: 18px; }
 .f-file-text { display: grid; min-width: 0; flex: 1; }
 .f-file-name { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-weight: 500; }
 .f-file-size { font-size: 0.85rem; color: var(--muted); }
@@ -563,12 +565,40 @@ textarea.f-input { min-height: 120px; resize: vertical; line-height: 1.55; }
   .jp-done .bet { width: 64px; height: 56px; }
   .bubble p { font-size: 1.2rem; }
 }
+
+/* Pixel icons. Every icon on the site is pixel art: the 5x5 icons on a tile (.pi) and the plain glyphs in
+   buttons (.pxi: a 7x7 or 9x9 grid, 2px pixels at their usual size). Each pixel has a place in the drawing
+   order (--i), and the icons move a pixel at a time, like the demo list: they draw themselves in the first time
+   they come into view (html.px-draw, see the script at the end; never in the top bar), a button's glyph turns
+   blue pixel by pixel while you point at it, a tile icon redraws when you point at its card, and swaps (sun and
+   moon, copy and tick, open and closed) go pixel by pixel. With reduced motion they are simply there. */
+:root { --primary-inv: #a8c7fa; }      /* a blue that reads on the dark pill buttons: the other theme's primary */
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --primary-inv: #0b57d0; } }
+:root[data-theme="dark"] { --primary-inv: #0b57d0; }
+.pxi { flex: none; display: block; width: 14px; height: 14px; overflow: visible; }
+.pxi rect { fill: currentColor; }
+.theme-toggle .i-sun rect, :root[data-theme="dark"] .theme-toggle .i-moon rect { opacity: 0; }
+:root[data-theme="dark"] .theme-toggle .i-sun rect { opacity: 1; }
+@media (prefers-reduced-motion: no-preference) {
+  .pi .pi-p rect, .pxi rect {
+    transition: opacity 0s linear calc(var(--i) * var(--pxs, 30ms)), fill 0s linear calc(var(--i) * var(--pxs, 30ms));
+  }
+  html.px-draw .pi:not(.is-drawn) .pi-p rect, html.px-draw .pxi:not(.is-drawn) rect { opacity: 0; }
+}
+@media (hover: hover) {
+  .theme-toggle:hover .pxi rect, .faq-q button:hover .pxi rect, .jp-back:hover .pxi rect, .f-upload:hover .pxi rect { fill: var(--primary); }
+  .cta:hover .pxi rect, .inbox:hover .pxi rect, .role:hover .pxi rect { fill: var(--primary-inv); }
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .fc-card:hover .pi .pi-p rect, .tile:hover .pi .pi-p rect { animation: px-redraw 1ms calc(var(--i) * var(--pxs, 30ms)) backwards; }
+}
+@keyframes px-redraw { from, to { opacity: 0; } }
 </style>
 </head>
 <body>
 <div class="jp">
   <header class="jp-head rise">
-    <a class="jp-back" href="careers.html" aria-label="Back to all open roles"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a class="jp-back" href="careers.html" aria-label="Back to all open roles"><svg class="pxi" viewBox="0 0 7 7" shape-rendering="crispEdges" aria-hidden="true"><rect x="6" y="3" width="1" height="1" style="--i:0"/><rect x="5" y="3" width="1" height="1" style="--i:1"/><rect x="4" y="3" width="1" height="1" style="--i:2"/><rect x="3" y="0" width="1" height="1" style="--i:3"/><rect x="3" y="1" width="1" height="1" style="--i:4"/><rect x="3" y="3" width="1" height="1" style="--i:5"/><rect x="3" y="5" width="1" height="1" style="--i:6"/><rect x="3" y="6" width="1" height="1" style="--i:7"/><rect x="2" y="1" width="1" height="1" style="--i:8"/><rect x="2" y="2" width="1" height="1" style="--i:9"/><rect x="2" y="3" width="1" height="1" style="--i:10"/><rect x="2" y="4" width="1" height="1" style="--i:11"/><rect x="2" y="5" width="1" height="1" style="--i:12"/><rect x="1" y="2" width="1" height="1" style="--i:13"/><rect x="1" y="3" width="1" height="1" style="--i:14"/><rect x="1" y="4" width="1" height="1" style="--i:15"/><rect x="0" y="3" width="1" height="1" style="--i:16"/></svg></a>
     <a class="jp-logo" href="index.html" aria-label="Bet home"><svg class="bet still" viewBox="0 0 16 14" shape-rendering="crispEdges" aria-hidden="true"><g class="bet-body"><rect x="4" y="0" width="8" height="1" fill="#845eee"/><rect x="2" y="1" width="12" height="1" fill="#845eee"/><rect x="1" y="2" width="2" height="1" fill="#845eee"/><rect x="3" y="2" width="2" height="1" fill="#c6b7fa"/><rect x="5" y="2" width="9" height="1" fill="#845eee"/><rect x="14" y="2" width="1" height="1" fill="#6441ce"/><rect x="1" y="3" width="1" height="1" fill="#845eee"/><rect x="2" y="3" width="1" height="1" fill="#c6b7fa"/><rect x="3" y="3" width="11" height="1" fill="#845eee"/><rect x="14" y="3" width="1" height="1" fill="#6441ce"/><rect x="0" y="4" width="2" height="1" fill="#845eee"/><rect x="2" y="4" width="1" height="1" fill="#c6b7fa"/><rect x="3" y="4" width="11" height="1" fill="#845eee"/><rect x="14" y="4" width="2" height="1" fill="#6441ce"/><rect x="0" y="5" width="14" height="1" fill="#845eee"/><rect x="14" y="5" width="2" height="1" fill="#6441ce"/><rect x="0" y="6" width="14" height="1" fill="#845eee"/><rect x="14" y="6" width="2" height="1" fill="#6441ce"/><rect x="0" y="7" width="14" height="1" fill="#845eee"/><rect x="14" y="7" width="2" height="1" fill="#6441ce"/><rect x="0" y="8" width="2" height="1" fill="#845eee"/><rect x="2" y="8" width="2" height="1" fill="#e89fc4"/><rect x="4" y="8" width="8" height="1" fill="#845eee"/><rect x="12" y="8" width="2" height="1" fill="#e89fc4"/><rect x="14" y="8" width="2" height="1" fill="#6441ce"/><rect x="1" y="9" width="12" height="1" fill="#845eee"/><rect x="13" y="9" width="2" height="1" fill="#6441ce"/><rect x="2" y="10" width="10" height="1" fill="#845eee"/><rect x="12" y="10" width="2" height="1" fill="#6441ce"/><rect x="1" y="11" width="2" height="1" fill="#845eee"/><rect x="4" y="11" width="2" height="1" fill="#845eee"/><rect x="7" y="11" width="2" height="1" fill="#845eee"/><rect x="10" y="11" width="2" height="1" fill="#845eee"/><rect x="13" y="11" width="2" height="1" fill="#6441ce"/><g class="eyes-open"><rect x="4" y="6" width="1" height="1" fill="#ffffff"/><rect x="5" y="6" width="1" height="1" fill="#1c1431"/><rect x="10" y="6" width="1" height="1" fill="#ffffff"/><rect x="11" y="6" width="1" height="1" fill="#1c1431"/><rect x="4" y="7" width="2" height="1" fill="#1c1431"/><rect x="10" y="7" width="2" height="1" fill="#1c1431"/></g><g class="eyes-shut"><rect x="4" y="7" width="2" height="1" fill="#1c1431"/><rect x="10" y="7" width="2" height="1" fill="#1c1431"/></g><g class="legs-a"><rect x="1" y="12" width="1" height="1" fill="#845eee"/><rect x="4" y="12" width="1" height="1" fill="#845eee"/><rect x="7" y="12" width="2" height="1" fill="#845eee"/><rect x="11" y="12" width="1" height="1" fill="#845eee"/><rect x="14" y="12" width="1" height="1" fill="#6441ce"/><rect x="0" y="13" width="2" height="1" fill="#845eee"/><rect x="3" y="13" width="2" height="1" fill="#845eee"/><rect x="7" y="13" width="2" height="1" fill="#845eee"/><rect x="11" y="13" width="2" height="1" fill="#845eee"/><rect x="14" y="13" width="2" height="1" fill="#6441ce"/></g><g class="legs-b"><rect x="2" y="12" width="1" height="1" fill="#845eee"/><rect x="5" y="12" width="1" height="1" fill="#845eee"/><rect x="7" y="12" width="2" height="1" fill="#845eee"/><rect x="10" y="12" width="1" height="1" fill="#845eee"/><rect x="13" y="12" width="1" height="1" fill="#6441ce"/><rect x="1" y="13" width="2" height="1" fill="#845eee"/><rect x="4" y="13" width="2" height="1" fill="#845eee"/><rect x="7" y="13" width="2" height="1" fill="#845eee"/><rect x="10" y="13" width="2" height="1" fill="#845eee"/><rect x="13" y="13" width="2" height="1" fill="#6441ce"/></g></g></svg><span aria-hidden="true">bet</span></a>
   </header>
 
@@ -609,11 +639,11 @@ textarea.f-input { min-height: 120px; resize: vertical; line-height: 1.55; }
                 <div class="f-drop">
                   <input class="f-file" id="f-resume" name="resume" type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" aria-required="true" aria-labelledby="f-resume-lbl" aria-describedby="f-resume-hint f-resume-err">
                   <div class="f-drop-empty">
-                    <label class="f-upload" for="f-resume"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M5 20h14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>Upload File</label>
+                    <label class="f-upload" for="f-resume"><svg class="pxi" viewBox="0 0 7 7" shape-rendering="crispEdges" aria-hidden="true"><rect x="3" y="0" width="1" height="1" style="--i:0"/><rect x="2" y="1" width="1" height="1" style="--i:1"/><rect x="3" y="1" width="1" height="1" style="--i:2"/><rect x="4" y="1" width="1" height="1" style="--i:3"/><rect x="1" y="2" width="1" height="1" style="--i:4"/><rect x="2" y="2" width="1" height="1" style="--i:5"/><rect x="3" y="2" width="1" height="1" style="--i:6"/><rect x="4" y="2" width="1" height="1" style="--i:7"/><rect x="5" y="2" width="1" height="1" style="--i:8"/><rect x="3" y="3" width="1" height="1" style="--i:9"/><rect x="0" y="4" width="1" height="1" style="--i:10"/><rect x="3" y="4" width="1" height="1" style="--i:11"/><rect x="6" y="4" width="1" height="1" style="--i:12"/><rect x="0" y="5" width="1" height="1" style="--i:13"/><rect x="6" y="5" width="1" height="1" style="--i:14"/><rect x="0" y="6" width="1" height="1" style="--i:15"/><rect x="1" y="6" width="1" height="1" style="--i:16"/><rect x="2" y="6" width="1" height="1" style="--i:17"/><rect x="3" y="6" width="1" height="1" style="--i:18"/><rect x="4" y="6" width="1" height="1" style="--i:19"/><rect x="5" y="6" width="1" height="1" style="--i:20"/><rect x="6" y="6" width="1" height="1" style="--i:21"/></svg>Upload File</label>
                     <span class="f-drop-or">or drag and drop here</span>
                   </div>
                   <div class="f-drop-file" hidden>
-                    <span class="f-file-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z M14 3v5h5 M9 13h6M9 17h4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                    <span class="f-file-icon" aria-hidden="true"><svg class="pxi" viewBox="0 0 9 9" shape-rendering="crispEdges" aria-hidden="true" style="--pxs:16ms"><rect x="1" y="0" width="1" height="1" style="--i:0"/><rect x="2" y="0" width="1" height="1" style="--i:1"/><rect x="3" y="0" width="1" height="1" style="--i:2"/><rect x="4" y="0" width="1" height="1" style="--i:3"/><rect x="5" y="0" width="1" height="1" style="--i:4"/><rect x="1" y="1" width="1" height="1" style="--i:5"/><rect x="5" y="1" width="1" height="1" style="--i:6"/><rect x="6" y="1" width="1" height="1" style="--i:7"/><rect x="1" y="2" width="1" height="1" style="--i:8"/><rect x="5" y="2" width="1" height="1" style="--i:9"/><rect x="6" y="2" width="1" height="1" style="--i:10"/><rect x="7" y="2" width="1" height="1" style="--i:11"/><rect x="1" y="3" width="1" height="1" style="--i:12"/><rect x="7" y="3" width="1" height="1" style="--i:13"/><rect x="1" y="4" width="1" height="1" style="--i:14"/><rect x="3" y="4" width="1" height="1" style="--i:15"/><rect x="4" y="4" width="1" height="1" style="--i:16"/><rect x="5" y="4" width="1" height="1" style="--i:17"/><rect x="7" y="4" width="1" height="1" style="--i:18"/><rect x="1" y="5" width="1" height="1" style="--i:19"/><rect x="7" y="5" width="1" height="1" style="--i:20"/><rect x="1" y="6" width="1" height="1" style="--i:21"/><rect x="3" y="6" width="1" height="1" style="--i:22"/><rect x="4" y="6" width="1" height="1" style="--i:23"/><rect x="5" y="6" width="1" height="1" style="--i:24"/><rect x="7" y="6" width="1" height="1" style="--i:25"/><rect x="1" y="7" width="1" height="1" style="--i:26"/><rect x="7" y="7" width="1" height="1" style="--i:27"/><rect x="1" y="8" width="1" height="1" style="--i:28"/><rect x="2" y="8" width="1" height="1" style="--i:29"/><rect x="3" y="8" width="1" height="1" style="--i:30"/><rect x="4" y="8" width="1" height="1" style="--i:31"/><rect x="5" y="8" width="1" height="1" style="--i:32"/><rect x="6" y="8" width="1" height="1" style="--i:33"/><rect x="7" y="8" width="1" height="1" style="--i:34"/></svg></span>
                     <span class="f-file-text"><span class="f-file-name"></span><span class="f-file-size"></span></span>
                     <span class="f-file-actions">
                       <button class="f-mini" type="button" data-file="replace">Replace</button>
@@ -1074,6 +1104,27 @@ textarea.f-input { min-height: 120px; resize: vertical; line-height: 1.55; }
       failed('network');
     });
   });
+})();
+</script>
+<script>
+// Pixel icons (see "Pixel icons" in the styles): each one draws itself in, pixel by pixel, the first time most
+// of it is on screen. Icons a script adds later (the careers list) are picked up as they arrive.
+(function () {
+  if (!document.documentElement.classList.contains('px-draw')) return;
+  var io = new IntersectionObserver(function (es) {
+    es.forEach(function (e) {
+      if (e.isIntersecting && e.intersectionRatio >= 0.6) { e.target.classList.add('is-drawn'); io.unobserve(e.target); }
+    });
+  }, { threshold: [0.6] });
+  var SEL = 'svg.pi:not(.is-drawn), svg.pxi:not(.is-drawn)';
+  function watch(n) {
+    if (n.matches && n.matches(SEL)) io.observe(n);
+    if (n.querySelectorAll) n.querySelectorAll(SEL).forEach(function (el) { io.observe(el); });
+  }
+  watch(document);
+  new MutationObserver(function (ms) {
+    ms.forEach(function (m) { m.addedNodes.forEach(function (n) { if (n.nodeType === 1) watch(n); }); });
+  }).observe(document.body, { childList: true, subtree: true });
 })();
 </script>
 </body>
