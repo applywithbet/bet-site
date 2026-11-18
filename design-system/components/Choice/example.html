@@ -1,0 +1,11 @@
+<!-- @dsCard group="Forms" height=200 order=3 -->
+<div style="display:grid;gap:22px">
+  <fieldset class="bet-field-row bet-field-lg"><legend class="bet-field-label" style="margin-bottom:8px">Can you work in the New York office five days a week?</legend>
+    <div class="bet-choice"><label><input type="radio" name="ch-ny" checked><span>Yes</span></label><label><input type="radio" name="ch-ny"><span>No</span></label></div>
+  </fieldset>
+  <div class="bet-choice" aria-label="Kinds of job"><button class="bet-toggle" type="button" aria-pressed="true">Full time</button><button class="bet-toggle" type="button" aria-pressed="true">Rotational program</button><button class="bet-toggle" type="button" aria-pressed="false">Internship</button><button class="bet-toggle" type="button" aria-pressed="false">Remote</button></div>
+  <div class="bet-check"><input type="checkbox" id="ch-alerts" checked><label for="ch-alerts">Tell me when a new job matches</label></div>
+</div>
+<script>
+document.querySelectorAll('.bet-toggle').forEach(function (b) { if (b.__t) return; b.__t = 1; b.addEventListener('click', function () { b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') === 'true' ? 'false' : 'true'); }); });
+</script>

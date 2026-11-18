@@ -1,0 +1,16 @@
+<!-- @dsCard group="Motion" height=300 order=1 -->
+<div id="mo" style="display:grid;gap:18px">
+  <p class="bet-section bet-words" id="mo-w"><span class="w"><span style="--d:-.9s">Make</span></span> <span class="w"><span style="--d:-.84s">applying</span></span> <span class="w"><span style="--d:-.78s">to</span></span> <span class="w"><span style="--d:-.72s">jobs</span></span> <span class="w"><span style="--d:-.66s"><em>easy.</em></span></span></p>
+  <div style="display:flex;flex-wrap:wrap;gap:12px" id="mo-p"><span class="bet-pill bet-pop-in" style="--d:.3s">{{tile:import:bet-pi-sm}}Import your resume</span><span class="bet-pill bet-pop-in" style="--d:.42s">{{tile:cursor:bet-pi-sm}}Apply with autofill</span></div>
+  <div><button class="bet-btn bet-btn-outline" type="button" id="mo-again">Play again</button></div>
+</div>
+<script>
+(function () {
+  var b = document.getElementById('mo-again');
+  if (!b || b.__m) return; b.__m = 1;
+  b.addEventListener('click', function () {
+    ['mo-w', 'mo-p'].forEach(function (id) { var el = document.getElementById(id); var c = el.cloneNode(true); el.replaceWith(c); });
+    Bet.init(document);
+  });
+})();
+</script>

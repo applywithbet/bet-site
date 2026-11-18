@@ -1,0 +1,31 @@
+<!-- @dsCard group="Navigation" height=120 order=1 -->
+<div style="display:grid;gap:18px">
+<nav class="bet-topbar" aria-label="Main" id="tb-demo">
+  <a class="bet-brand" href="#">{{bet:is-still}}<span>bet</span></a>
+  <div class="bet-tabs">
+    <a class="bet-tab" href="#" aria-current="true"><span class="lbl" data-label="How it works">How it works</span></a>
+    <a class="bet-tab" href="#"><span class="lbl" data-label="Mobile app">Mobile app</span></a>
+    <a class="bet-tab" href="#"><span class="lbl" data-label="Why Bet">Why Bet</span></a>
+    <a class="bet-tab" href="#"><span class="lbl" data-label="Careers">Careers</span></a>
+  </div>
+  <button class="bet-icon-btn bet-theme-toggle" type="button" aria-label="Switch theme">{{icon:sun:i-sun is-drawn}}{{icon:moon:i-moon is-drawn}}</button>
+  <a class="bet-btn bet-btn-sm" href="#">Book a demo</a>
+</nav>
+<nav class="bet-topbar" aria-label="Dashboard" id="tb-app">
+  <a class="bet-brand" href="#">{{bet:is-still}}<span>bet</span></a>
+  <div class="bet-tabs" role="tablist">
+    <button class="bet-tab" role="tab" aria-selected="true"><span class="lbl" data-label="Apply today">Apply today</span><span class="bet-count">20</span></button>
+    <button class="bet-tab" role="tab" aria-selected="false"><span class="lbl" data-label="Job bank">Job bank</span><span class="bet-count">1,240</span></button>
+    <button class="bet-tab" role="tab" aria-selected="false"><span class="lbl" data-label="Tracker">Tracker</span><span class="bet-count">18</span></button>
+  </div>
+</nav>
+</div>
+<script>
+document.querySelectorAll('#tb-demo .bet-tab').forEach(function (t, i, all) {
+  t.addEventListener('click', function (e) { e.preventDefault(); all.forEach(function (o) { o.removeAttribute('aria-current'); }); t.setAttribute('aria-current', 'true'); });
+});
+document.querySelectorAll('#tb-app .bet-tab').forEach(function (t, i, all) {
+  t.addEventListener('click', function () { all.forEach(function (o) { o.setAttribute('aria-selected', o === t ? 'true' : 'false'); }); });
+});
+Bet.init(document);
+</script>

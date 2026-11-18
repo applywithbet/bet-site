@@ -1,0 +1,48 @@
+<!-- @dsCard height=288 -->
+<style>
+  html, body { margin: 0; background: var(--bg); }
+  .cv { position: relative; width: 960px; height: 288px; overflow: hidden; background: var(--bg); }
+  .cv svg { position: absolute; inset: 0; width: 960px; height: 288px; }
+  .c-primary { fill: var(--primary); }
+  .c-soft { fill: var(--primary-soft); }
+  .c-ink { fill: var(--ink); }
+  .c-lilac { fill: var(--hero-b); }
+  .c-lavender { fill: var(--hero-c); }
+  .c-octo { fill: var(--octo); }
+  .c-ground { fill: var(--bg); }
+  .cv-text { position: absolute; left: 40px; bottom: 34px; max-width: 440px; }
+  .cv-name { margin: 0; font-family: var(--font-display); font-weight: 500; font-size: 120px; line-height: 0.92; letter-spacing: -0.05em; color: var(--ink); }
+  .cv-line { margin: 12px 0 0; font-family: var(--font-body); font-size: 14px; line-height: 1.4; color: var(--muted); }
+</style>
+<div class="cv">
+  <svg viewBox="0 0 960 288" aria-hidden="true">
+    <!--
+      blocks: primary 200x240 (slab), ink 224x56 (the dark pill), hero-b 104x104, hero-c 104x168, octo 104x48, from the palette Bet is known by.
+      arrangement: one tall slab with satellites, right of x=496, flush to a 16px gap (space-16), top and bottom 24px in (space-24).
+      pattern: the dotted band's stepped edge (page colour cut into the slab's top in 12/24/36px steps) and 36 pixel squares in primary-soft,
+               because pixel art is how Bet draws everything small; squares 4px at a 12px pitch (space-12), staggered like the band's dots.
+      scales: radius-tile 24 on the slab and tiles, radius-panel 16 on the small block, the pill at half its height (28); gaps space-16.
+    -->
+    <rect class="c-primary" x="496" y="24" width="200" height="240" rx="24"/>
+    <rect class="c-ground" x="496" y="24" width="56" height="36"/>
+    <rect class="c-ground" x="552" y="24" width="48" height="12"/>
+    <rect class="c-ground" x="600" y="24" width="48" height="24"/>
+    <rect class="c-ground" x="648" y="24" width="12" height="12"/>
+    <g class="c-soft">
+      <rect x="520" y="152" width="4" height="4"/><rect x="544" y="152" width="4" height="4"/><rect x="568" y="152" width="4" height="4"/><rect x="592" y="152" width="4" height="4"/><rect x="616" y="152" width="4" height="4"/><rect x="640" y="152" width="4" height="4"/>
+      <rect x="532" y="164" width="4" height="4"/><rect x="556" y="164" width="4" height="4"/><rect x="580" y="164" width="4" height="4"/><rect x="604" y="164" width="4" height="4"/><rect x="628" y="164" width="4" height="4"/><rect x="652" y="164" width="4" height="4"/>
+      <rect x="520" y="176" width="4" height="4"/><rect x="544" y="176" width="4" height="4"/><rect x="568" y="176" width="4" height="4"/><rect x="592" y="176" width="4" height="4"/><rect x="616" y="176" width="4" height="4"/><rect x="640" y="176" width="4" height="4"/>
+      <rect x="532" y="188" width="4" height="4"/><rect x="556" y="188" width="4" height="4"/><rect x="580" y="188" width="4" height="4"/><rect x="604" y="188" width="4" height="4"/><rect x="628" y="188" width="4" height="4"/><rect x="652" y="188" width="4" height="4"/>
+      <rect x="520" y="200" width="4" height="4"/><rect x="544" y="200" width="4" height="4"/><rect x="568" y="200" width="4" height="4"/><rect x="592" y="200" width="4" height="4"/><rect x="616" y="200" width="4" height="4"/><rect x="640" y="200" width="4" height="4"/>
+      <rect x="532" y="212" width="4" height="4"/><rect x="556" y="212" width="4" height="4"/><rect x="580" y="212" width="4" height="4"/><rect x="604" y="212" width="4" height="4"/><rect x="628" y="212" width="4" height="4"/><rect x="652" y="212" width="4" height="4"/>
+    </g>
+    <rect class="c-ink" x="712" y="24" width="224" height="56" rx="28"/>
+    <rect class="c-lilac" x="712" y="96" width="104" height="104" rx="24"/>
+    <rect class="c-lavender" x="832" y="96" width="104" height="168" rx="24"/>
+    <rect class="c-octo" x="712" y="216" width="104" height="48" rx="16"/>
+  </svg>
+  <div class="cv-text">
+    <p class="cv-name">Bet</p>
+    <p class="cv-line">A job board that applies for you, and everything it ships.</p>
+  </div>
+</div>

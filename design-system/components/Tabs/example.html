@@ -1,0 +1,10 @@
+<!-- @dsCard group="Navigation" height=110 order=2 -->
+<div class="bet-utabs" role="tablist" id="ut-demo">
+  <button class="bet-utab" role="tab" aria-selected="true" type="button">Overview</button>
+  <button class="bet-utab" role="tab" aria-selected="false" type="button">Application</button>
+</div>
+<script>
+document.querySelectorAll('#ut-demo .bet-utab').forEach(function (t, i, all) {
+  t.addEventListener('click', function () { all.forEach(function (o) { o.setAttribute('aria-selected', o === t ? 'true' : 'false'); }); });
+});
+</script>

@@ -1,0 +1,1692 @@
+/* Bet design system: components.
+   Load order: fonts.css (or the Google Fonts link), tokens.css, then this file, then icons.js and bet.js.
+   Every value comes from tokens.css or from the Bet site's own recipes (bet-site/index.html, demo.html, job.html,
+   careers.html). Class names carry a bet- prefix so they can sit inside a third-party page or a shadow root without
+   colliding. Inside a shadow root, tokens.css already targets :host, and bet.js init(shadowRoot) wires behaviours. */
+
+/* ---------- Motion ---------- */
+:root, :host {
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);        /* reveals, rise-ins, the hero words, logo waves */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);  /* the top bar arriving, page fade, accordions, view swaps */
+  --ease-std: cubic-bezier(0.44, 0, 0.56, 1);       /* cards appearing, a list item switching, steps fading */
+  --ease-pop: cubic-bezier(0.34, 1.3, 0.64, 1);     /* buttons popping in, the segmented thumb */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1); /* a bubble popping out, the logo taking Bet in */
+  --ease-lens: cubic-bezier(0.3, 1.3, 0.45, 1);     /* the glass lens sliding between tabs */
+  --ease-theme: cubic-bezier(0.65, 0, 0.35, 1);     /* the theme circle */
+  --ease-glide: cubic-bezier(0.32, 0.08, 0.24, 1);  /* anything that folds, opens or slides in an app (sidebar, panels, folds): starts from rest */
+  --dur-fast: 0.2s;     /* colour on hover */
+  --dur: 0.25s;         /* buttons lifting, fills */
+  --dur-page: 0.32s;    /* page to page fade */
+  --dur-step: 0.35s;    /* a step or list item fading in */
+  --dur-open: 0.45s;    /* accordions, edge glow */
+  --dur-glide: 0.46s;   /* a fold, a sidebar, a panel sliding away (with --ease-glide) */
+  --dur-appear: 0.6s;   /* cards appearing, the lens */
+  --dur-rise: 0.7s;     /* a page settling in */
+  --dur-reveal: 0.75s;  /* scroll reveals */
+  --pxs: 30ms;          /* pixel icons: delay per pixel when drawing in or changing colour */
+}
+
+/* ---------- Base (opt in: put .bet-base on body, or on the wrapper inside a shadow root) ---------- */
+.bet-base {
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+.bet-base *, .bet-base *::before, .bet-base *::after { box-sizing: border-box; }
+.bet-page { background: var(--bg); min-height: 100%; }
+/* Plain links only (no class); zero specificity so every component's own colours win */
+:where(.bet-base a:not([class])) { color: var(--primary); font-weight: 500; text-decoration: none; }
+:where(.bet-base a:not([class])):hover { text-decoration: underline; text-underline-offset: 3px; }
+:where(.bet-base a:not([class])):focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: var(--radius-xs); }
+:where(.bet-base :focus-visible) { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* ---------- Type: class .bet-<style> for each type style in tokens.json ---------- */
+.bet-hero, .bet-display, .bet-stat, .bet-headline, .bet-section, .bet-step,
+.bet-title-xl, .bet-title-lg, .bet-title-md, .bet-title, .bet-title-sm, .bet-question,
+.bet-wordmark, .bet-section-label, .bet-pill-text, .bet-app-title, .bet-app-heading {
+  margin: 0;
+  font-family: var(--font-display);
+  color: var(--ink);
+}
+.bet-hero { font-weight: 500; font-size: clamp(2.4rem, 7.6vw, 4.9rem); line-height: 1.02; letter-spacing: -0.04em; text-wrap: balance; }
+.bet-hero em { font-style: normal; font-weight: var(--title-weight); color: var(--hero-accent); }
+.bet-display { font-weight: 500; font-size: clamp(2.6rem, 5vw, 4rem); line-height: 1.05; letter-spacing: -0.045em; text-wrap: balance; }
+.bet-stat { font-weight: 500; font-size: clamp(4rem, 7vw, 6.4rem); line-height: 0.9; letter-spacing: -0.06em; color: var(--primary); font-variant-numeric: tabular-nums; }
+.bet-headline { font-weight: 500; font-size: clamp(1.8rem, 3.4vw, 3.1rem); line-height: 1.1; letter-spacing: -0.045em; }
+.bet-headline .line { display: block; text-wrap: balance; }
+.bet-headline em { font-style: normal; color: var(--primary); font-weight: var(--title-weight); }
+.bet-section { font-weight: 500; font-size: clamp(1.9rem, 3.4vw, 2.75rem); line-height: 1.2; letter-spacing: -0.045em; text-wrap: balance; }
+.bet-display em, .bet-section em, .bet-step em { font-style: normal; color: var(--primary); }
+.bet-step { font-weight: 500; font-size: clamp(1.6rem, 2.5vw, 2.25rem); line-height: 1.1; letter-spacing: -0.035em; text-wrap: balance; }
+.bet-title-xl { font-weight: var(--title-weight); font-size: clamp(1.7rem, 2.8vw, 2.4rem); line-height: 1.1; letter-spacing: -0.04em; text-wrap: balance; }
+.bet-title-lg { font-weight: var(--title-weight); font-size: clamp(1.45rem, 2.1vw, 1.9rem); line-height: 1.15; letter-spacing: -0.035em; text-wrap: balance; }
+.bet-title-lg em { font-style: normal; color: var(--hero-accent); }
+.bet-title-md { font-weight: var(--title-weight); font-size: 1.5rem; line-height: 1.4; letter-spacing: -0.04em; }
+.bet-title { font-weight: var(--title-weight); font-size: 1.25rem; line-height: 1.3; letter-spacing: -0.03em; }
+.bet-title-sm { font-weight: var(--title-weight); font-size: 1.2rem; line-height: 1.3; letter-spacing: -0.03em; }
+.bet-question { font-weight: 500; font-size: 1.125rem; line-height: 1.4; letter-spacing: -0.015em; }
+.bet-wordmark { font-weight: var(--title-weight); font-size: 1.3rem; line-height: 1; letter-spacing: -0.02em; }
+.bet-section-label { font-weight: 500; font-size: 1rem; color: var(--muted); }
+.bet-pill-text { font-weight: 500; font-size: 0.95rem; line-height: 1.4; letter-spacing: -0.01em; }
+.bet-app-title { font-weight: var(--title-weight); font-size: 25px; line-height: 1.14; letter-spacing: -0.035em; text-wrap: balance; }
+.bet-app-heading { font-weight: var(--title-weight); font-size: 21px; line-height: 1.1; letter-spacing: -0.03em; }
+.bet-body-lg { margin: 0; font-size: 1.05rem; line-height: 1.55; color: var(--muted); text-wrap: pretty; }
+.bet-body { margin: 0; font-size: 1rem; line-height: 1.7; color: var(--muted); text-wrap: pretty; }
+.bet-body-sm { margin: 0; font-size: 0.95rem; line-height: 1.55; color: var(--muted); }
+.bet-app-body { margin: 0; font-size: 14px; line-height: 1.5; color: var(--muted); }
+.bet-caption { margin: 0; font-size: 0.86rem; line-height: 1.5; font-weight: 500; color: var(--muted); }
+.bet-small { margin: 0; font-size: 0.82rem; line-height: 1.35; color: var(--muted); }
+.bet-app-meta { margin: 0; font-size: 12.5px; line-height: 1.4; color: var(--muted); }
+.bet-micro { margin: 0; font-size: 0.78rem; font-weight: 500; color: var(--muted); }
+.bet-num { font-variant-numeric: tabular-nums; }
+@media (max-width: 767px) {
+  .bet-section { font-size: 1.75rem; }
+  .bet-title-md { font-size: 1.25rem; }
+}
+
+/* ---------- Buttons ----------
+   One shape: the pill. The dark pill (ink) is the action; glass is the second choice; quiet text buttons sit
+   inside panels. A pixel glyph sits at 14px; the arrow sits in its own circle on the main pill. */
+.bet-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 46px;
+  padding: 10px 22px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--ink);
+  color: var(--on-ink);
+  font: inherit;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 1.02rem;
+  line-height: 1.5;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: var(--shadow-cta);
+  transition: transform var(--dur) ease, box-shadow var(--dur) ease, background-color var(--dur) ease, color var(--dur) ease;
+}
+.bet-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-cta-hover); background: color-mix(in srgb, var(--ink) 86%, var(--bg)); text-decoration: none; }
+.bet-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+.bet-btn:disabled, .bet-btn[aria-disabled="true"] { opacity: 0.72; cursor: progress; transform: none; }
+.bet-btn:has(> .bet-btn-arrow) { padding: 10px 10px 10px 22px; }
+.bet-btn-arrow {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--on-ink) 18%, transparent);
+  transition: transform var(--dur) ease;
+}
+.bet-btn:hover .bet-btn-arrow { transform: translateX(2px); }
+.bet-btn-down:hover .bet-btn-arrow { transform: translateY(2px); }
+.bet-btn-lg { padding: 12px 24px; }
+.bet-btn-lg:has(> .bet-btn-arrow) { padding: 12px 12px 12px 24px; }
+.bet-btn-sm { min-height: 38px; height: 38px; padding: 0 18px; font-size: 0.88rem; box-shadow: var(--shadow-pill); }
+.bet-btn-sm:hover { box-shadow: var(--shadow-pill); }
+.bet-btn-block { display: flex; width: 100%; min-height: 54px; padding: 0 24px; font-size: 1.05rem; box-shadow: none; }
+.bet-btn-block:hover { box-shadow: none; }
+/* Glass: the second button beside a dark one */
+.bet-btn-ghost { padding: 12px 25px; color: var(--ink); }
+/* Outline: a quieter second choice inside a panel */
+.bet-btn-outline { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--field-line); }
+.bet-btn-outline:hover { background: var(--tint); box-shadow: inset 0 0 0 1.5px var(--field-line); }
+/* Quiet: text-only actions in a row (Replace, Remove, Undo) */
+.bet-btn-quiet {
+  min-height: 34px; height: 34px; padding: 0 12px;
+  background: transparent; color: var(--muted); box-shadow: none;
+  font-size: 0.88rem;
+}
+.bet-btn-quiet:hover { background: var(--tint); color: var(--ink); box-shadow: none; transform: none; }
+/* Light: a white pill on bg (Upload file) */
+.bet-btn-light {
+  min-height: 40px; height: 40px; padding: 0 18px; gap: 8px;
+  background: var(--surface); color: var(--ink);
+  font-size: 0.95rem;
+  box-shadow: var(--shadow-light-btn);
+}
+.bet-btn-light:hover { background: var(--surface); transform: none; box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--ink) 40%, transparent), 0 4px 12px -8px rgba(20, 20, 20, 0.4); }
+@media (max-width: 600px) {
+  .bet-btn-lg { font-size: 0.95rem; padding: 9px 18px; gap: 8px; }
+  .bet-btn-lg:has(> .bet-btn-arrow) { padding: 9px 9px 9px 18px; }
+  .bet-btn-arrow { width: 26px; height: 26px; }
+}
+
+/* Round icon buttons: the theme switch (in glass) and the back arrow (on a page) */
+.bet-icon-btn {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 38px; height: 38px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color var(--dur) ease, background-color var(--dur) ease;
+}
+.bet-icon-btn:hover { background: var(--glass-hover); color: var(--ink); }
+.bet-icon-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+.bet-icon-btn > svg { grid-area: 1 / 1; }
+.bet-icon-btn-lg { width: 44px; height: 44px; transition: background-color var(--dur-fast) ease, color var(--dur-fast) ease; }
+.bet-icon-btn-lg:hover { background: var(--tint); }
+.bet-icon-btn-lg > .bet-pxi { width: 21px; height: 21px; }
+/* The big round pass button on a job card */
+.bet-icon-btn-xl {
+  width: 56px; height: 56px;
+  background: var(--surface); color: var(--ink);
+  box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--ink) 10%, transparent), 0 6px 14px -8px rgba(0, 0, 0, 0.25);
+}
+.bet-icon-btn-xl:hover { background: var(--surface); }
+.bet-icon-btn-xl > .bet-pxi { width: 21px; height: 21px; }
+
+/* Copy capsule: a value that copies on click. The text rolls to "Copied to clipboard", the icon swaps to a tick
+   pixel by pixel, and four pixel hearts float up. */
+.bet-copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  max-width: 100%;
+  padding: 5px 5px 5px 20px;
+  border: 1px solid var(--tile-line);
+  border-radius: var(--radius-pill);
+  background: var(--wash);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--dur) ease, background-color var(--dur) ease;
+}
+.bet-copy:hover { border-color: color-mix(in srgb, var(--ink) 22%, transparent); background: color-mix(in srgb, var(--ink) 5%, transparent); }
+.bet-copy:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+.bet-copy-text { display: grid; min-width: 0; overflow: hidden; font-family: var(--font-display); font-weight: 500; font-size: 1.05rem; line-height: 1.4; letter-spacing: -0.01em; }
+.bet-copy-text > span { grid-area: 1 / 1; min-width: 0; overflow-wrap: anywhere; transition: transform var(--dur-open) var(--ease-out-soft), opacity 0.3s ease; }
+.bet-copy-done { color: var(--primary); transform: translateY(100%); opacity: 0; }
+.bet-copy.is-copied .bet-copy-value { transform: translateY(-100%); opacity: 0; }
+.bet-copy.is-copied .bet-copy-done { transform: none; opacity: 1; }
+.bet-copy-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--on-ink);
+  box-shadow: var(--shadow-pill);
+  transition: background-color var(--dur) ease;
+}
+.bet-copy:hover .bet-copy-icon { background: color-mix(in srgb, var(--ink) 86%, var(--bg)); }
+.bet-copy-icon > svg { grid-area: 1 / 1; }
+.bet-copy-icon .i-check rect, .bet-copy.is-copied .i-copy rect { opacity: 0; }
+.bet-copy.is-copied .i-check rect { opacity: 1; }
+
+/* ---------- Liquid glass ----------
+   A glass element is three layers. Under it, the backdrop: blurred and saturated, and in Chromium on a desktop
+   (Bet.glass in bet.js) bent inward along the rim like the curved edge of a lens and split a little into colours,
+   while the middle stays frosted; other browsers keep the frost. On it, the tint (glass-a to glass-b). Over it, the
+   light: a hairline rim that is brightest nearest the light, a soft sheen under the same light, a brighter band along
+   the top edge and shade along the bottom where the glass is thick. The light sits top left (--lg-x, --lg-y) and
+   stays there; it does not follow the pointer. Pressed, the glass squashes
+   and springs back (at the end of this file). Use it for things that float over content: the top bar, the second
+   button, feature pills, the status bar, menus and toasts. Never for whole panels. data-bet-glass makes any element
+   glass; data-bet-glass="still" keeps the frost and the light but skips the bend.
+   Where the light sits is registered as not inherited, so setting it on one piece of glass never restyles what is
+   inside it (a whole sidebar). The two layers that draw the light take it from their glass on purpose (inherit). */
+@property --lg-x { syntax: "<length-percentage>"; inherits: false; initial-value: 28%; }
+@property --lg-y { syntax: "<length-percentage>"; inherits: false; initial-value: -12%; }
+.bet-glass, .bet-btn-ghost, .bet-pill, .bet-menu, .bet-toast, .bet-statusbar, .bet-role-apply, .bet-topbar, [data-bet-glass] {
+  --lg-x: 28%; --lg-y: -12%;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 0;
+  background: linear-gradient(180deg, var(--glass-a), var(--glass-b));
+  -webkit-backdrop-filter: blur(16px) saturate(1.8);
+  backdrop-filter: blur(16px) saturate(1.8);
+  box-shadow: var(--shadow-glass-sm);
+}
+/* With the bend under it, the tint can be thinner so the lens shows through */
+[data-bet-bent] { background: linear-gradient(180deg, color-mix(in srgb, var(--glass-a) 82%, transparent), color-mix(in srgb, var(--glass-b) 82%, transparent)); }
+.bet-glass::before, .bet-btn-ghost::before, .bet-pill::before, .bet-menu::before, .bet-toast::before, .bet-statusbar::before, .bet-role-apply::before, .bet-topbar::before, [data-bet-glass]::before,
+.bet-glass::after, .bet-btn-ghost::after, .bet-pill::after, .bet-menu::after, .bet-toast::after, .bet-statusbar::after, .bet-role-apply::after, .bet-topbar::after, [data-bet-glass]::after {
+  --lg-x: inherit; --lg-y: inherit;
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+}
+/* The rim: a hairline, brightest nearest the light, with a steady glint top left and bottom right */
+.bet-glass::before, .bet-btn-ghost::before, .bet-pill::before, .bet-menu::before, .bet-toast::before, .bet-statusbar::before, .bet-role-apply::before, .bet-topbar::before, [data-bet-glass]::before {
+  padding: 1px;
+  background:
+    radial-gradient(circle 220px at var(--lg-x) var(--lg-y), var(--glass-rim), transparent),
+    linear-gradient(118deg, var(--glass-rim), transparent 24% 76%, var(--glass-rim-soft));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+/* The sheen under the light, and the thickness of the glass: a bright band along the top edge, shade along the bottom */
+.bet-glass::after, .bet-btn-ghost::after, .bet-pill::after, .bet-menu::after, .bet-toast::after, .bet-statusbar::after, .bet-role-apply::after, .bet-topbar::after, [data-bet-glass]::after {
+  background: radial-gradient(circle 180px at var(--lg-x) var(--lg-y), var(--glass-rim-soft), transparent);
+  box-shadow: inset 0 10px 14px -14px var(--glass-rim), inset 0 -12px 16px -16px var(--glass-shadow);
+}
+.bet-btn-ghost:hover, .bet-pill:hover, a.bet-glass:hover, button.bet-glass:hover, a[data-bet-glass]:hover, button[data-bet-glass]:hover {
+  background: linear-gradient(180deg, var(--glass-lens), var(--glass-b));
+  box-shadow: var(--shadow-glass-hover);
+}
+
+/* ---------- Top bar: a floating glass capsule with a lens on the current tab ---------- */
+.bet-topbar {
+  position: relative;
+  z-index: 20;
+  width: fit-content;
+  max-width: calc(100% - 32px);
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-glass);
+}
+.bet-topbar-fixed { position: fixed; top: calc(16px + env(safe-area-inset-top, 0px)); left: 0; right: 0; }
+.bet-topbar > * { position: relative; z-index: 1; }
+.bet-topbar.is-hidden { transform: translateY(calc(-100% - 28px)) scale(0.94); opacity: 0; visibility: hidden; }
+@media (prefers-reduced-motion: no-preference) {
+  .bet-topbar { transition: transform 0.8s var(--ease-out-soft), opacity 0.4s ease, visibility 0s, scale 0.7s var(--ease-spring); }
+  .bet-topbar.is-hidden { transition: transform 0.8s var(--ease-out-soft), opacity 0.5s ease, visibility 0s linear 0.5s, scale 0.7s var(--ease-spring); }
+}
+.bet-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  height: 38px;
+  padding: 0 14px 0 12px;
+  border-radius: var(--radius-pill);
+  color: var(--ink);
+  text-decoration: none;
+  font-family: var(--font-display);
+  font-weight: var(--title-weight);
+  font-size: 1.3rem;
+  letter-spacing: -0.02em;
+}
+.bet-brand:hover { text-decoration: none; }
+.bet-brand .bet { width: 24px; height: 21px; }
+.bet-brand:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+.bet-tabs { position: relative; display: flex; gap: 2px; min-width: 0; border-radius: var(--radius-pill); }
+.bet-tabs::-webkit-scrollbar { display: none; }
+.bet-tab {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  height: 38px;
+  padding: 0 15px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--dur) ease, background-color var(--dur) ease;
+}
+.bet-tab:hover { text-decoration: none; }
+.bet-tab .lbl { display: inline-grid; }
+.bet-tab .lbl::after { content: attr(data-label); font-weight: 600; height: 0; visibility: hidden; overflow: hidden; }   /* holds the bold width so tabs never shift */
+.bet-tab:not([aria-current]):not([aria-selected="true"]):hover { background: var(--glass-hover); color: var(--ink); }
+.bet-tab[aria-current], .bet-tab[aria-selected="true"] { color: var(--ink); font-weight: 600; }
+.bet-tab:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+.bet-tab .bet-count { margin-left: 6px; font-weight: 500; color: var(--muted); font-variant-numeric: tabular-nums; }
+.bet-tabs:not(.is-lensed) .bet-tab[aria-current], .bet-tabs:not(.is-lensed) .bet-tab[aria-selected="true"] { background: var(--glass-lens); }
+/* The lens: a brighter drop of glass behind the current tab. The leading edge moves first and the trailing edge
+   follows 90ms later, so it stretches and settles like liquid (bet.js also squashes it a little on the way). */
+.bet-lens {
+  position: absolute;
+  z-index: 0;
+  top: 0; bottom: 0;
+  left: 0; right: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--glass-lens);
+  box-shadow: var(--shadow-lens);
+  opacity: 0;
+  pointer-events: none;
+}
+.bet-lens.is-on { opacity: 1; }
+.bet-lens::before {
+  --lg-x: inherit; --lg-y: inherit;
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: radial-gradient(circle 160px at var(--lg-x, 50%) var(--lg-y, -30%), var(--glass-rim), transparent);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .bet-lens { transition: left var(--dur-appear) var(--ease-lens), right var(--dur-appear) var(--ease-lens), opacity 0.3s ease; }
+  .bet-lens.to-right { transition-delay: 0.09s, 0s, 0s; }
+  .bet-lens.to-left { transition-delay: 0s, 0.09s, 0s; }
+}
+.bet-topbar .bet-btn-sm { margin-left: 6px; }
+.bet-tabs.fade-l { -webkit-mask-image: linear-gradient(90deg, transparent, #000 26px); mask-image: linear-gradient(90deg, transparent, #000 26px); }
+.bet-tabs.fade-r { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 26px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 26px), transparent); }
+.bet-tabs.fade-l.fade-r { -webkit-mask-image: linear-gradient(90deg, transparent, #000 26px, #000 calc(100% - 26px), transparent); mask-image: linear-gradient(90deg, transparent, #000 26px, #000 calc(100% - 26px), transparent); }
+@media (max-width: 800px) {
+  .bet-brand span { display: none; }
+  .bet-brand { padding: 0 10px; }
+  .bet-tab { padding: 0 12px; }
+}
+@media (max-width: 720px) {
+  .bet-topbar .bet-btn-sm { display: none; }
+  .bet-tabs { overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain; }
+}
+@media (max-width: 560px) {
+  .bet-topbar { max-width: calc(100% - 24px); gap: 2px; padding: 5px; }
+  .bet-topbar-fixed { top: calc(12px + env(safe-area-inset-top, 0px)); }
+  .bet-brand { height: 36px; padding: 0 9px; }
+  .bet-brand .bet { width: 26px; height: 22.75px; }
+  .bet-tabs { gap: 0; }
+  .bet-tab { height: 36px; padding: 0 11px; font-size: 0.86rem; }
+  .bet-topbar .bet-icon-btn { width: 36px; height: 36px; }
+}
+.bet-lg-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+/* Light/dark switch: a round glass button. A dark page shows the sun, a light page the moon; they swap pixel by
+   pixel. bet.js grows the new theme as a circle out of the button. */
+.bet-theme-toggle > .bet-pxi { width: 18px; height: 18px; }
+.bet-theme-toggle .i-sun rect { opacity: 0; }
+[data-theme="dark"] .bet-theme-toggle .i-sun rect, :host([data-theme="dark"]) .bet-theme-toggle .i-sun rect { opacity: 1; }
+[data-theme="dark"] .bet-theme-toggle .i-moon rect, :host([data-theme="dark"]) .bet-theme-toggle .i-moon rect { opacity: 0; }
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+/* Between pages of one site: the new page fades in over the old one; the top bar stays put. */
+@view-transition { navigation: auto; }
+:root:not(.theme-vt)::view-transition-new(root) { animation: bet-page-in var(--dur-page) var(--ease-out-soft) both; }
+@keyframes bet-page-in { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { @view-transition { navigation: none; } }
+
+/* ---------- Underline tabs (a posting's Overview / Application) ---------- */
+.bet-utabs { display: flex; }
+.bet-utab {
+  position: relative;
+  flex: 0 0 200px;
+  padding: 10px 0 14px;
+  border: 0;
+  background: none;
+  text-align: center;
+  color: var(--muted);
+  text-decoration: none;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.12rem;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: color var(--dur) ease;
+}
+.bet-utab::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: var(--ink);
+  transform: scaleX(0);
+  transition: transform 0.4s var(--ease-out-soft);
+}
+.bet-utab:hover { color: var(--ink); text-decoration: none; }
+.bet-utab[aria-current], .bet-utab[aria-selected="true"] { color: var(--ink); }
+.bet-utab[aria-current]::after, .bet-utab[aria-selected="true"]::after { transform: none; }
+.bet-utab:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; border-radius: 8px; }
+@media (max-width: 860px) { .bet-utab { flex: 1 1 0; } }
+
+/* ---------- Segmented control: a white thumb on a tint track ---------- */
+.bet-seg {
+  --n: 3;
+  --at: 0;
+  position: relative;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  padding: 3px;
+  border-radius: var(--radius-pill);
+  background: var(--tint);
+}
+.bet-seg::before {
+  content: "";
+  position: absolute;
+  top: 3px; bottom: 3px; left: 3px;
+  width: calc((100% - 6px) / var(--n));
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  transform: translateX(calc(100% * var(--at)));
+  transition: transform 0.55s var(--ease-pop);
+}
+.bet-seg > button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.bet-seg > button small { margin-left: 4px; font-size: 12px; font-weight: 400; color: var(--muted); }
+.bet-seg > button:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+
+/* ---------- Side list (a sticky column's list of sections; the one in view turns blue) ---------- */
+.bet-sidenav { position: relative; display: grid; justify-items: start; gap: 28px; }
+.bet-sidenav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-decoration: none;
+  font-size: 1.125rem;
+  font-weight: 500;
+  line-height: 1.7;
+  color: var(--muted);
+}
+.bet-sidenav-item:hover { text-decoration: none; }
+.bet-sidenav-item .tx { position: relative; display: block; overflow: hidden; }
+.bet-sidenav-item .t { display: block; }
+.bet-sidenav-item .on { position: absolute; inset: 0; color: var(--primary); transform: translateY(100%); }
+.bet-sidenav-item.is-on .off { transform: translateY(-100%); }
+.bet-sidenav-item.is-on .on { transform: none; }
+.bet-sidenav-item:hover .off { color: var(--ink); }
+.bet-sidenav-item:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+.bet-sidenav-item .bet-pi .pi-t { fill: color-mix(in srgb, var(--ink) 6%, transparent); }
+.bet-sidenav-item .bet-pi .pi-p rect { fill: color-mix(in srgb, var(--ink) 26%, transparent); }
+.bet-sidenav-item:hover .bet-pi .pi-p rect { fill: color-mix(in srgb, var(--ink) 48%, transparent); }
+.bet-sidenav-item.is-on .bet-pi .pi-t { fill: var(--primary-soft); }
+.bet-sidenav-item.is-on .bet-pi .pi-p rect { fill: var(--primary); }
+@media (prefers-reduced-motion: no-preference) {
+  .bet-sidenav-item .t { transition: transform var(--dur-appear) var(--ease-std), color var(--dur-fast) ease; }
+  .bet-sidenav-item .bet-pi .pi-t { transition: fill 0.3s ease; }
+}
+.bet-sidenav-sm { gap: 13px; }
+.bet-sidenav-sm .bet-sidenav-item { font-family: var(--font-display); font-size: 1rem; letter-spacing: -0.02em; line-height: 1.25; gap: 12px; }
+
+/* ---------- Surfaces ---------- */
+/* Tile: the bento box. Surface fill, a masked 1.5px hairline edge, and an edge that lights up blue around the
+   pointer (bet.js glow() feeds --mx/--my on fine pointers; registered as not inherited, like the glass light, so the
+   pointer only redoes the tile's own styles, and the edge and the dots take them from the tile on purpose). */
+@property --mx { syntax: "<length>"; inherits: false; initial-value: -999px; }
+@property --my { syntax: "<length>"; inherits: false; initial-value: -999px; }
+.bet-tile {
+  --mx: -999px; --my: -999px;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-width: 0;
+  padding: clamp(22px, 2.4vw, 32px);
+  border-radius: var(--radius-tile);
+  background: var(--surface);
+}
+.bet-tile::before, .bet-tile::after, .bet-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  padding: 1.5px;
+  border-radius: inherit;
+  background: var(--tile-line);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  pointer-events: none;
+}
+.bet-tile::after {
+  --mx: inherit; --my: inherit;
+  background: radial-gradient(240px circle at var(--mx) var(--my), color-mix(in srgb, var(--primary) 75%, transparent), transparent 70%);
+  opacity: 0;
+  transition: opacity var(--dur-open) ease;
+}
+.bet-glow:hover .bet-tile::after, .bet-tile.is-lit::after { opacity: 1; }
+.bet-tiles { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 1023px) { .bet-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; } }
+@media (max-width: 640px) {
+  .bet-tiles { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .bet-tile { gap: 18px; padding: 20px; border-radius: 20px; }
+}
+/* A recessed panel inside a tile (a feed, a form) */
+.bet-recess { position: relative; overflow: hidden; border-radius: var(--radius-panel); background: var(--bg); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 5%, transparent); }
+/* Faint dot grid in an empty corner of a tile; it brightens around the pointer */
+.bet-tile-dots {
+  --mx: inherit; --my: inherit;
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image: radial-gradient(circle, color-mix(in srgb, var(--ink) 18%, transparent) 1px, transparent 1.6px);
+  background-size: 20px 20px;
+  -webkit-mask-image: radial-gradient(ellipse 60% 85% at 100% 0%, #000, transparent 70%);
+  mask-image: radial-gradient(ellipse 60% 85% at 100% 0%, #000, transparent 70%);
+}
+.bet-glow:hover .bet-tile-dots {
+  -webkit-mask-image: radial-gradient(ellipse 60% 85% at 100% 0%, #000, transparent 70%), radial-gradient(170px circle at var(--mx) var(--my), #000, transparent 75%);
+  mask-image: radial-gradient(ellipse 60% 85% at 100% 0%, #000, transparent 70%), radial-gradient(170px circle at var(--mx) var(--my), #000, transparent 75%);
+}
+
+/* Card: a big content panel standing on the page (a posting, a profile). Masked hairline, soft raised shadow. */
+.bet-card {
+  position: relative;
+  border-radius: var(--radius-tile);
+  background: var(--surface);
+  box-shadow: var(--shadow-raised);
+}
+.bet-card::before { z-index: 0; }
+.bet-card > * { position: relative; z-index: 1; }
+@media (max-width: 560px) { .bet-card { border-radius: 20px; } }
+
+/* Sheet: a band of content that lifts off whatever is behind it (shadow on the top edge only) */
+.bet-sheet {
+  position: relative;
+  padding: 48px clamp(16px, 4vw, 50px) 0;
+  border-radius: var(--radius-sheet);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1.5px var(--tile-line);
+}
+.bet-sheet::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 0; left: 0; right: 0;
+  height: 160px;
+  border-radius: inherit;
+  box-shadow: var(--shadow-sheet);
+  pointer-events: none;
+}
+@media (max-width: 767px) { .bet-sheet { padding-top: 36px; border-radius: 22px; } }
+
+/* Two-layer card: a soft tray with the white panel inside it (forms). Solid fills only, nothing behind it. */
+.bet-tray {
+  padding: 24px;
+  border-radius: var(--radius-tray);
+  background: color-mix(in srgb, var(--ink) 3%, var(--bg));
+  box-shadow: inset 0 0 0 1px var(--hairline);
+}
+.bet-panel {
+  display: grid;
+  padding: 32px;
+  border-radius: var(--radius-panel);
+  background: var(--surface);
+  box-shadow: var(--shadow-panel);
+}
+@media (max-width: 767px) {
+  .bet-tray { padding: 8px; border-radius: 24px; }
+  .bet-panel { padding: 22px 20px; border-radius: 18px; }
+}
+
+/* Divider: every line fades out at both ends (clear at the edges, full by 10%) */
+.bet-divider { height: 1.5px; margin: 0; border: 0; background: linear-gradient(90deg, transparent, var(--hairline) 10%, var(--hairline) 90%, transparent); }
+.bet-divider-solid { height: 1px; background: linear-gradient(90deg, transparent, var(--line) 10%, var(--line) 90%, transparent); }
+.bet-rule-top { border-top: 1px solid transparent; border-image: linear-gradient(90deg, transparent, var(--line) 10%, var(--line) 90%, transparent) 1; }
+.bet-rule-bottom { border-bottom: 1.5px solid transparent; border-image: linear-gradient(90deg, transparent, var(--hairline) 10%, var(--hairline) 90%, transparent) 1; }
+
+/* ---------- The colour field (smooth gradients only, never pixelated) ----------
+   Four soft blobs (blue, lilac, lavender, periwinkle) on a lavender white, a veil of light in the middle and a faint
+   grain so it never bands. Use it for the hero, a sign-off tile and showcase panels. Never behind a form, a dialog
+   or a job page. */
+.bet-colorfield {
+  --m: 480px;                    /* the box's long side; bet.js field() keeps it measured */
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  color: var(--hero-ink);
+  background-color: var(--hero-base);
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 0 0.6  0 0 0 0.056 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"),
+    radial-gradient(ellipse calc(var(--m) * 0.59) calc(var(--m) * 0.44) at 50% 50%, color-mix(in srgb, var(--surface) 38%, transparent), color-mix(in srgb, var(--surface) 14%, transparent) 34%, transparent 62%),
+    radial-gradient(circle at calc(var(--m) * 0.13) calc(var(--m) * 0.07), var(--hero-a), color-mix(in srgb, var(--hero-a) 72%, transparent) calc(var(--m) * 0.178), transparent calc(var(--m) * 0.366)),
+    radial-gradient(circle at calc(100% - var(--m) * 0.11) calc(var(--m) * 0.11), var(--hero-b), color-mix(in srgb, var(--hero-b) 72%, transparent) calc(var(--m) * 0.178), transparent calc(var(--m) * 0.366)),
+    radial-gradient(circle at calc(var(--m) * 0.15) calc(100% - var(--m) * 0.03), var(--hero-c), color-mix(in srgb, var(--hero-c) 72%, transparent) calc(var(--m) * 0.178), transparent calc(var(--m) * 0.366)),
+    radial-gradient(circle at calc(100% - var(--m) * 0.19) calc(100% - var(--m) * 0.09), var(--hero-d), color-mix(in srgb, var(--hero-d) 72%, transparent) calc(var(--m) * 0.178), transparent calc(var(--m) * 0.366));
+  background-size: 160px 160px, auto, auto, auto, auto, auto;
+}
+/* The live version for a hero: the blobs bloom in and drift slowly */
+.bet-hero-field { position: relative; z-index: 0; isolation: isolate; overflow: hidden; color: var(--hero-ink); background: var(--hero-base); }
+.bet-hero-field::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.16;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 0 0.6  0 0 0 0.35 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  pointer-events: none;
+}
+.bet-hero-field > * { position: relative; z-index: 1; }
+.bet-hero-field > .bet-blobs { position: absolute; inset: -60px; z-index: -3; pointer-events: none; }
+.bet-blob {
+  position: absolute;
+  width: 74vmax;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, var(--c) 0%, color-mix(in srgb, var(--c) 72%, transparent) 34%, transparent 70%);
+  will-change: translate, scale;
+}
+.bet-blob.a { --c: var(--hero-a); left: -24vmax; top: -30vmax; }
+.bet-blob.b { --c: var(--hero-b); right: -26vmax; top: -26vmax; }
+.bet-blob.c { --c: var(--hero-c); left: -22vmax; bottom: -34vmax; }
+.bet-blob.d { --c: var(--hero-d); right: -18vmax; bottom: -28vmax; }
+.bet-hero-field > .bet-veil {
+  position: absolute;
+  z-index: -1;
+  left: 50%; top: 50%;
+  width: 84vmax; height: 62vmax;
+  translate: -50% -50%;
+  background: radial-gradient(ellipse at center, color-mix(in srgb, var(--surface) 38%, transparent) 0%, color-mix(in srgb, var(--surface) 14%, transparent) 34%, transparent 62%);
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .bet-blobs { animation: bet-fade-in 1.1s ease-out backwards; }
+  .bet-blob { animation: bet-bloom 1.5s var(--ease-out) backwards, bet-drift-a 16s ease-in-out -4s infinite alternate; }
+  .bet-blob.b { animation-name: bet-bloom, bet-drift-b; animation-duration: 1.5s, 21s; animation-delay: 0.06s, -9s; }
+  .bet-blob.c { animation-name: bet-bloom, bet-drift-c; animation-duration: 1.5s, 18s; animation-delay: 0.12s, -6s; }
+  .bet-blob.d { animation-name: bet-bloom, bet-drift-d; animation-duration: 1.5s, 24s; animation-delay: 0.18s, -13s; }
+  .bet-veil { animation: bet-fade-in 1.4s ease-out 0.5s backwards; }
+}
+@keyframes bet-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes bet-bloom { from { scale: 0.6; opacity: 0; } to { scale: 1; opacity: 1; } }
+@keyframes bet-drift-a { from { translate: 0 0; } to { translate: 10vmax 7vmax; } }
+@keyframes bet-drift-b { from { translate: 0 0; } to { translate: -9vmax 8vmax; } }
+@keyframes bet-drift-c { from { translate: 0 0; } to { translate: 8vmax -9vmax; } }
+@keyframes bet-drift-d { from { translate: 0 0; } to { translate: -10vmax -6vmax; } }
+/* The sign-off tile's slow swirl of the four colours */
+.bet-swirl {
+  position: absolute;
+  inset: -40%;
+  z-index: -1;
+  background:
+    radial-gradient(30% 36% at 30% 32%, var(--hero-a), transparent 70%),
+    radial-gradient(32% 38% at 72% 28%, var(--hero-b), transparent 70%),
+    radial-gradient(34% 34% at 64% 74%, var(--hero-c), transparent 70%),
+    radial-gradient(28% 32% at 26% 74%, var(--hero-d), transparent 70%);
+  pointer-events: none;
+}
+.bet-tile.bet-tile-field { --tile-line: color-mix(in srgb, var(--hero-ink) 10%, transparent); background: var(--hero-base); color: var(--hero-ink); }
+@media (prefers-reduced-motion: no-preference) { .bet-swirl { animation: bet-swirl 26s linear infinite; } }
+@keyframes bet-swirl { to { rotate: 360deg; } }
+
+/* ---------- Forms ---------- */
+.bet-form { display: grid; gap: 24px; min-width: 0; }
+.bet-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 20px; }
+.bet-form-grid > .is-wide { grid-column: 1 / -1; }
+@media (max-width: 480px) { .bet-form-grid { grid-template-columns: minmax(0, 1fr); gap: 16px; } }
+.bet-field-row { display: grid; align-content: start; gap: 8px; min-width: 0; margin: 0; padding: 0; border: 0; }
+.bet-field-label { padding: 0; font-size: 0.875rem; font-weight: 500; color: var(--ink); }
+.bet-field-lg .bet-field-label { font-family: var(--font-display); font-size: 1rem; letter-spacing: -0.01em; }
+.bet-req { margin-left: 2px; color: var(--muted); }
+.bet-help { margin: -2px 0 0; font-size: 0.88rem; color: var(--muted); }
+.bet-err { margin: 0; font-size: 0.82rem; line-height: 1.35; color: var(--err); }
+.bet-err:empty { display: none; }
+/* Filled input: no outline until you point at it or focus it (short forms on a white panel) */
+.bet-input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 54px;
+  margin: 0;
+  padding: 0 18px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-field);
+  background: var(--bg);
+  color: var(--ink);
+  font: inherit;
+  font-size: 1rem;              /* 16px so phones don't zoom on focus */
+  transition: border-color var(--dur-fast) ease, box-shadow var(--dur-fast) ease, background-color var(--dur-fast) ease;
+}
+.bet-input::placeholder { color: color-mix(in srgb, var(--muted) 65%, transparent); }
+.bet-input:hover { border-color: color-mix(in srgb, var(--ink) 14%, transparent); }
+.bet-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--focus-ring); }
+.bet-input[aria-invalid="true"] { border-color: var(--err); }
+.bet-input[aria-invalid="true"]:focus { box-shadow: 0 0 0 3px color-mix(in srgb, var(--err) 22%, transparent); }
+/* Outlined input: long application forms, where every field must read as a field */
+.bet-input-outline {
+  height: auto;
+  min-height: 48px;
+  padding: 11px 14px;
+  border: 1.5px solid var(--field-line);
+}
+.bet-input-outline::placeholder { color: color-mix(in srgb, var(--muted) 70%, transparent); }
+.bet-input-outline:hover { border-color: color-mix(in srgb, var(--ink) 28%, transparent); }
+.bet-input-outline:focus { background: var(--surface); }
+textarea.bet-input { height: auto; min-height: 120px; padding-block: 11px; resize: vertical; line-height: 1.55; }
+/* Compact input for dense product screens (filters, inline edits) */
+.bet-input-sm { height: 38px; min-height: 38px; padding: 0 12px; border: 1.5px solid var(--field-line); border-radius: var(--radius-sm); font-size: 0.9rem; }
+.bet-input-sm:hover { border-color: color-mix(in srgb, var(--ink) 28%, transparent); }
+.bet-select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 42px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 7 7' shape-rendering='crispEdges'%3E%3Cpath d='M0 1h1v1H0zM6 1h1v1H6zM0 2h1v1H0zM1 2h1v1H1zM5 2h1v1H5zM6 2h1v1H6zM1 3h1v1H1zM2 3h1v1H2zM4 3h1v1H4zM5 3h1v1H5zM2 4h1v1H2zM3 4h1v1H3zM4 4h1v1H4zM3 5h1v1H3z' fill='%23888'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  cursor: pointer;
+}
+.bet-input-sm.bet-select { padding-right: 34px; background-position: right 11px center; }
+/* Search: the tint pill (a search bar is the one place tint is the field) */
+.bet-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 48px;
+  padding: 0 8px 0 18px;
+  border-radius: var(--radius-pill);
+  background: var(--tint);
+  color: var(--muted);
+  transition: box-shadow var(--dur-fast) ease, background-color var(--dur-fast) ease;
+}
+.bet-search:focus-within { background: var(--surface); box-shadow: 0 0 0 1.5px var(--primary), 0 0 0 4.5px var(--focus-ring); }
+.bet-search input { flex: 1; min-width: 0; height: 100%; border: 0; background: none; color: var(--ink); font: inherit; font-size: 1rem; }
+.bet-search input:focus { outline: none; }
+.bet-search input::placeholder { color: color-mix(in srgb, var(--muted) 80%, transparent); }
+/* Checkbox and its line */
+.bet-check { display: flex; align-items: flex-start; gap: 10px; font-size: 0.92rem; line-height: 1.45; color: var(--muted); }
+.bet-check input { flex: none; width: 18px; height: 18px; margin: 1px 0 0; accent-color: var(--primary); cursor: pointer; }
+.bet-check input:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.bet-check input[aria-invalid="true"] { outline: 2px solid var(--err); outline-offset: 2px; border-radius: 5px; }
+.bet-check label { cursor: pointer; }
+/* Choices: Yes / No pills (radios), and toggle chips (buttons with aria-pressed). The chosen one fills with ink. */
+.bet-choice { display: flex; flex-wrap: wrap; gap: 10px; }
+.bet-choice label { position: relative; flex: 0 1 140px; }
+.bet-choice input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.bet-choice span, .bet-toggle {
+  display: grid;
+  place-items: center;
+  height: 46px;
+  padding: 0 18px;
+  border: 1.5px solid var(--field-line);
+  border-radius: var(--radius-pill);
+  background: var(--bg);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color var(--dur-fast) ease, background-color var(--dur-fast) ease, color var(--dur-fast) ease;
+}
+.bet-toggle { display: inline-grid; height: 38px; font-size: 0.92rem; }
+.bet-choice span:hover, .bet-toggle:hover { border-color: color-mix(in srgb, var(--ink) 28%, transparent); }
+.bet-choice input:checked + span, .bet-toggle[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: var(--on-ink); }
+.bet-choice input:focus-visible + span, .bet-toggle:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.bet-choice[aria-invalid="true"] span { border-color: var(--err); }
+@media (max-width: 560px) { .bet-choice label { flex: 1 1 0; } }
+/* Upload: a drop zone with a light Upload button, then the chosen file */
+.bet-drop {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 112px;
+  padding: 20px;
+  border: 1.5px dashed color-mix(in srgb, var(--ink) 22%, transparent);
+  border-radius: var(--radius-panel);
+  background: var(--bg);
+  transition: border-color var(--dur-fast) ease, background-color var(--dur-fast) ease;
+}
+.bet-drop.is-over { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 8%, var(--bg)); }
+.bet-drop.is-bad { border-color: var(--err); }
+.bet-drop.has-file { border-style: solid; place-items: stretch; min-height: 0; padding: 14px 16px; }
+.bet-drop input[type="file"] { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; clip-path: inset(50%); }
+.bet-drop input[type="file"]:focus-visible + .bet-drop-empty .bet-btn-light { outline: 2px solid var(--primary); outline-offset: 3px; }
+.bet-drop-empty { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 14px; text-align: center; }
+.bet-drop-or { color: var(--muted); font-size: 0.95rem; }
+.bet-file { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.bet-file-icon { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: var(--radius-sm); background: var(--tint); color: var(--ink); }
+.bet-file-icon .bet-pxi { width: 18px; height: 18px; }
+.bet-file-text { display: grid; flex: 1; min-width: 0; }
+.bet-file-name { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-weight: 500; }
+.bet-file-size { font-size: 0.85rem; color: var(--muted); }
+.bet-file-actions { display: flex; flex: none; gap: 4px; }
+@media (max-width: 560px) { .bet-file { flex-wrap: wrap; } }
+
+/* ---------- Chips, tags, pills ---------- */
+.bet-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: none;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--tint);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+.bet-chip-green { background: var(--chip-green); color: var(--chip-green-ink); }
+.bet-chip-blue { background: var(--chip-blue); color: var(--chip-blue-ink); }
+.bet-chip-purple { background: var(--chip-purple); color: var(--chip-purple-ink); }
+.bet-chip-amber { background: var(--chip-amber); color: var(--chip-amber-ink); }
+.bet-chip-red { background: var(--chip-red); color: var(--chip-red-ink); }
+.bet-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 11px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--tile-line);
+  color: var(--ink);
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.bet-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+/* Feature pill: glass, with a small pixel tile icon; it redraws its icon on hover */
+.bet-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: var(--radius-pill);
+  color: var(--ink);
+  text-decoration: none;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 0.95rem;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+  white-space: nowrap;
+  transition: transform var(--dur) ease;
+}
+.bet-pill:hover { transform: translateY(-1px); text-decoration: none; }
+.bet-pill:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+@media (max-width: 600px) { .bet-pill { padding: 9px 15px; font-size: 0.88rem; } }
+/* "New": a blue dot that pings */
+.bet-new { display: inline-flex; align-items: center; gap: 6px; color: var(--primary); font-weight: 500; }
+.bet-new::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--primary); }
+@media (prefers-reduced-motion: no-preference) { .bet-new::before { animation: bet-ping 1.8s ease-out infinite; } }
+@keyframes bet-ping {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 55%, transparent); }
+  100% { box-shadow: 0 0 0 7px transparent; }
+}
+.bet-kbd {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--tint);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 10%, transparent);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+/* ---------- Lists ---------- */
+/* Feed row: one job in a live feed (title, meta, age). The newest one's age turns blue with a pinging dot. */
+.bet-feed { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.bet-feedrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-field);
+  background: var(--surface);
+  box-shadow: var(--shadow-row);
+}
+.bet-feedrow-main { display: grid; min-width: 0; }
+.bet-feedrow-title, .bet-feedrow-meta { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.bet-feedrow-title { font-size: 0.9rem; font-weight: 500; color: var(--ink); }
+.bet-feedrow-meta { font-size: 0.76rem; color: var(--muted); }
+.bet-feedrow-time { flex: none; display: inline-flex; align-items: center; gap: 6px; font-size: 0.74rem; color: var(--muted); }
+.bet-feedrow-time.bet-new { color: var(--primary); }
+/* Grouped list: rows on one white panel, hairlines inset past the logo */
+.bet-list { list-style: none; margin: 0; padding: 0; border-radius: var(--radius-list); background: var(--surface); box-shadow: 0 0 0 1px var(--hairline); overflow: hidden; }
+.bet-row { position: relative; display: flex; align-items: center; gap: 12px; padding: 11px 14px; color: inherit; text-decoration: none; }
+.bet-row + .bet-row::before { content: ""; position: absolute; top: 0; left: 66px; right: 0; height: 1px; background: color-mix(in srgb, var(--ink) 7%, transparent); }
+a.bet-row:hover, button.bet-row:hover, .bet-row.is-hover { background: var(--tint); text-decoration: none; }
+.bet-row .bet-logo { --sz: 40px; }
+.bet-row-text { flex: 1; min-width: 0; display: grid; gap: 1px; }
+.bet-row-title { font-size: 14.5px; font-weight: 500; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bet-row-sub { display: flex; align-items: center; gap: 5px; font-size: 12.5px; color: var(--muted); }
+/* Role row: a title, one line and a meta line, with the Apply pill on the right. The row fills with tint on hover
+   and its pill turns into the dark button. */
+.bet-roles { list-style: none; margin: 0; padding: 0; display: grid; }
+.bet-roles > li + li { border-top: 1px solid transparent; border-image: linear-gradient(90deg, transparent, var(--line) 10%, var(--line) 90%, transparent) 1; }
+.bet-role {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  width: calc(100% + 32px);
+  margin-inline: -16px;
+  padding: 20px 16px;
+  border: 0;
+  border-radius: var(--radius-row);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color var(--dur) ease;
+}
+.bet-role:hover { background: var(--tint); text-decoration: none; }
+.bet-role:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+.bet-role-main { display: grid; gap: 6px; flex: 1 1 0; min-width: 0; }
+.bet-role-title { font-family: var(--font-display); font-weight: var(--title-weight); font-size: 1.2rem; line-height: 1.3; letter-spacing: -0.03em; color: var(--ink); }
+.bet-role-desc { color: var(--muted); font-size: 0.97rem; line-height: 1.55; max-width: 62ch; text-wrap: pretty; }
+.bet-meta-line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 9px; margin-top: 4px; color: var(--muted); font-size: 0.86rem; font-weight: 500; line-height: 1.5; }
+.bet-meta-line .pay { color: var(--ink); }
+.bet-meta-line .dot { opacity: 0.45; }
+.bet-role-apply {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  height: 38px;
+  padding: 0 16px 0 18px;
+  border-radius: var(--radius-pill);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  transition: background-color var(--dur) ease, color var(--dur) ease, box-shadow var(--dur) ease;
+}
+.bet-role-apply .bet-pxi { transition: transform var(--dur) ease; }
+.bet-role:hover .bet-role-apply { background: var(--ink); color: var(--on-ink); box-shadow: var(--shadow-pill); }
+.bet-role:hover .bet-role-apply::before, .bet-role:hover .bet-role-apply::after { opacity: 0; }
+.bet-role:hover .bet-role-apply .bet-pxi { transform: translate(1px, -1px); }
+@media (max-width: 767px) {
+  .bet-role { gap: 14px; width: calc(100% + 24px); margin-inline: -12px; padding: 16px 12px; }
+  .bet-role-title { font-size: 1.1rem; }
+  .bet-role-desc { font-size: 0.93rem; line-height: 1.5; }
+  .bet-role-apply { width: 38px; padding: 0; justify-content: center; }
+  .bet-role-apply span { display: none; }
+}
+/* Details list: label over value, faded lines between */
+.bet-dl { margin: 0; display: grid; }
+.bet-dl > div { padding: 16px 0; }
+.bet-dl > div + div { border-top: 1px solid transparent; border-image: linear-gradient(90deg, transparent, var(--line) 10%, var(--line) 90%, transparent) 1; }
+.bet-dl dt { margin: 0 0 4px; font-size: 0.82rem; font-weight: 500; color: var(--muted); }
+.bet-dl dd { margin: 0; font-size: 1.04rem; line-height: 1.45; color: var(--ink); }
+/* Table (product addition): rows split by faded lines, numbers in tabular figures, a tint row on hover */
+.bet-table-wrap { overflow-x: auto; border-radius: var(--radius-tile); background: var(--surface); box-shadow: 0 0 0 1px var(--hairline); }
+.bet-table { width: 100%; border-collapse: collapse; font-size: 0.92rem; font-variant-numeric: tabular-nums; }
+.bet-table th { padding: 14px 16px 10px; text-align: left; font-size: 0.82rem; font-weight: 500; color: var(--muted); white-space: nowrap; }
+.bet-table td { padding: 12px 16px; color: var(--ink); border-top: 1px solid transparent; border-image: linear-gradient(90deg, transparent, var(--line) 4%, var(--line) 96%, transparent) 1; }
+.bet-table tbody tr { transition: background-color var(--dur-fast) ease; }
+.bet-table tbody tr:hover { background: var(--tint); }
+
+/* ---------- Job card (the product's core card, from the Bet app) ---------- */
+.bet-jobcard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-app-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+.bet-jobcard::after { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; box-shadow: var(--shadow-lift); opacity: 0; transition: opacity 0.3s ease; pointer-events: none; }
+.bet-jobcard.is-lift::after { opacity: 1; }
+.bet-jobcard-body { padding: 20px 20px 4px; }
+.bet-co { display: flex; align-items: center; gap: 12px; }
+.bet-co-text { flex: 1; min-width: 0; display: grid; gap: 1px; }
+.bet-co-name { font-weight: 500; font-size: 15.5px; color: var(--ink); }
+.bet-co-sub { font-size: 12.5px; color: var(--muted); }
+.bet-jobcard .bet-app-title { margin-top: 16px; }
+.bet-jobmeta { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 12px; font-size: 13.5px; color: var(--muted); }
+.bet-jobmeta > span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.bet-fit { display: flex; align-items: center; gap: 14px; margin-top: 16px; padding: 12px 14px; border-radius: var(--radius-row); background: var(--tint); }
+.bet-fit-text { display: grid; gap: 3px; min-width: 0; }
+.bet-fit-text b { font-weight: 500; font-size: 14.5px; color: var(--ink); }
+.bet-fit-text span { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bet-fit-text span .bet-pxi { color: var(--chip-green-ink); }
+.bet-sec { margin: 16px 0 0; font-weight: 500; font-size: 14px; color: var(--ink); }
+.bet-jobcard .bet-app-body { margin-top: 4px; }
+.bet-ul { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 5px; font-size: 14px; line-height: 1.4; color: var(--muted); }
+.bet-ul li { position: relative; padding-left: 15px; }
+.bet-ul li::before { content: ""; position: absolute; left: 2px; top: 0.55em; width: 5px; height: 5px; border-radius: 50%; background: color-mix(in srgb, var(--ink) 30%, transparent); }
+.bet-jobcard .bet-tags { margin-top: 14px; }
+.bet-jobcard-acts { display: flex; gap: 10px; padding: 14px 16px 16px; }
+/* The apply pill on a card: the dark button, full height, arrow in its circle */
+.bet-go {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  padding: 0 8px 0 22px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--ink);
+  color: var(--on-ink);
+  font: inherit;
+  font-weight: 500;
+  font-size: 16px;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: var(--shadow-cta);
+  transition: transform var(--dur) ease, background-color var(--dur) ease;
+}
+.bet-go:hover { transform: translateY(-1px); background: color-mix(in srgb, var(--ink) 86%, var(--bg)); text-decoration: none; }
+.bet-go:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+.bet-go > i { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: color-mix(in srgb, var(--on-ink) 18%, transparent); }
+.bet-go:hover .bet-pxi rect { fill: var(--primary-inv); }
+/* Company logo tile: the company's own mark on its own colour, a ring that keeps white tiles visible on white.
+   No mark: initials in the display face on tint. */
+.bet-logo {
+  --sz: 46px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: var(--sz); height: var(--sz);
+  border-radius: calc(var(--sz) * 0.27);
+  background: var(--lg-bg, var(--surface));
+  color: var(--lg-fg, var(--ink));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 12%, transparent);
+  overflow: hidden;
+}
+.bet-logo > svg, .bet-logo > img, .bet-logo > svg.bet { width: 56%; height: 56%; object-fit: contain; }
+.bet-logo.is-initials { background: var(--tint); font-family: var(--font-display); font-weight: var(--title-weight); font-size: calc(var(--sz) * 0.36); letter-spacing: -0.03em; }
+.bet-avatar { --sz: 32px; flex: none; display: grid; place-items: center; width: var(--sz); height: var(--sz); border-radius: 50%; background: var(--tint); color: var(--ink); font-family: var(--font-display); font-weight: 500; font-size: calc(var(--sz) * 0.4); overflow: hidden; }
+.bet-avatar > img { width: 100%; height: 100%; object-fit: cover; }
+/* Save circle beside a company name */
+.bet-save { display: grid; place-items: center; flex: none; width: 38px; height: 38px; padding: 0; border: 0; border-radius: 50%; background: var(--tint); color: var(--ink); cursor: pointer; }
+.bet-save[aria-pressed="true"] { color: var(--primary); }
+/* Fit ring: the match score. Set --p (0 to 100) on .bet-ring. */
+.bet-ring { --p: 0; position: relative; flex: none; width: 52px; height: 52px; color: var(--primary); }
+.bet-ring svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+.bet-ring circle { fill: none; stroke-width: 5; }
+.bet-ring .trk { stroke: color-mix(in srgb, var(--ink) 10%, transparent); }
+.bet-ring .bar { stroke: currentColor; stroke-linecap: round; stroke-dasharray: var(--p) 100; transition: stroke-dasharray var(--dur-appear) var(--ease-out); }
+.bet-ring b { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; line-height: 1; font-family: var(--font-display); font-weight: var(--title-weight); font-size: 16px; letter-spacing: -0.02em; color: var(--ink); }
+.bet-ring b small { margin: 3px 0 0 1px; font-size: 10px; font-weight: 500; }
+
+/* ---------- Accordion (one open at a time; the open one fills with bg) ---------- */
+.bet-faq { display: grid; gap: 12px; width: min(720px, 100%); }
+.bet-faq-item { border-radius: var(--radius-panel); box-shadow: inset 0 0 0 1px var(--tile-line); transition: background-color 0.35s ease, box-shadow 0.35s ease; }
+.bet-faq-item.is-open { background: var(--bg); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 5%, transparent); }
+.bet-faq-q { margin: 0; }
+.bet-faq-q button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  width: 100%;
+  padding: 26px 30px;
+  border: 0;
+  border-radius: var(--radius-panel);
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.125rem;
+  line-height: 1.4;
+  letter-spacing: -0.015em;
+  text-align: left;
+  cursor: pointer;
+}
+.bet-faq-q button:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+.bet-faq-chev { flex: none; display: grid; place-items: center; width: 28px; height: 28px; color: var(--muted); transition: color var(--dur-fast) ease; }
+.bet-faq-q button:hover .bet-faq-chev { color: var(--ink); }
+.bet-faq-chev .pxb rect, .bet-faq-item.is-open .bet-faq-chev .pxa rect { opacity: 0; }
+.bet-faq-item.is-open .bet-faq-chev .pxb rect { opacity: 1; }
+.bet-faq-a-in { min-height: 0; overflow: hidden; }
+.bet-faq-a p { margin: 0; padding: 0 30px 28px; max-width: 62ch; color: var(--muted); font-size: 0.98rem; line-height: 1.65; text-wrap: pretty; }
+.bet-faq.is-ready .bet-faq-a { display: grid; grid-template-rows: 0fr; visibility: hidden; transition: grid-template-rows var(--dur-open) var(--ease-out-soft), visibility 0s linear var(--dur-open); }
+.bet-faq.is-ready .bet-faq-item.is-open .bet-faq-a { grid-template-rows: 1fr; visibility: visible; transition: grid-template-rows var(--dur-open) var(--ease-out-soft), visibility 0s; }
+.bet-faq.is-ready .bet-faq-a p { opacity: 0; transition: opacity var(--dur) ease; }
+.bet-faq.is-ready .bet-faq-item.is-open .bet-faq-a p { opacity: 1; transition: opacity 0.4s ease 0.08s; }
+@media (max-width: 767px) {
+  .bet-faq-q button { gap: 16px; padding: 20px; font-size: 1.02rem; }
+  .bet-faq-a p { padding: 0 20px 22px; font-size: 0.95rem; }
+}
+
+/* ---------- Bet speaking: speech bubble, chat, status bar, empty state ---------- */
+.bet-says { display: flex; align-items: center; gap: 12px; }
+.bet-bubble {
+  position: relative;
+  isolation: isolate;
+  padding: 8px 18px;
+  border-radius: var(--radius-tile);
+  background: var(--surface);
+  color: var(--ink);
+  filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.12));
+}
+.bet-bubble::before {            /* the tail: a square on its corner, tip rounded, tucked into the round end */
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: -3.5px;
+  top: 50%;
+  width: 16px; height: 16px;
+  margin-top: -8px;
+  background: inherit;
+  border-bottom-left-radius: 2.5px;
+  transform: rotate(45deg);
+}
+.bet-bubble-tint { background: var(--tint); filter: none; }
+.bet-bubble-right::before { left: auto; right: -3.5px; border-bottom-left-radius: 0; border-top-right-radius: 2.5px; }
+.bet-say { margin: 0; font-family: var(--font-display); font-weight: var(--title-weight); font-size: 1.4rem; line-height: 1.2; letter-spacing: -0.01em; }
+@media (max-width: 560px) { .bet-bubble { padding: 7px 14px; } .bet-say { font-size: 1.2rem; } }
+/* Chat (product addition built from the bubble): Bet's lines on the left with the octopus by the newest one,
+   the person's lines on the right in tint, no tail. */
+.bet-chat { display: grid; gap: 10px; }
+.bet-chat-line { display: flex; align-items: flex-end; gap: 10px; max-width: 88%; }
+.bet-chat-line .bet { width: 32px; height: 28px; }
+.bet-chat-line > .bet-placeholder { flex: none; width: 32px; }
+.bet-chat-line .bet-bubble { padding: 10px 14px; border-radius: 18px; font-size: 0.95rem; line-height: 1.5; }
+.bet-chat-line .bet-bubble::before { top: auto; bottom: 10px; margin-top: 0; width: 12px; height: 12px; left: -3px; }
+.bet-chat-me { justify-self: end; max-width: 80%; padding: 10px 14px; border-radius: 18px; background: var(--tint); color: var(--ink); font-size: 0.95rem; line-height: 1.5; }
+/* Status bar: Bet at work. The octopus, what it's doing, and a ring that fills; on .is-ready the ring becomes a
+   tick. Built for the extension's floating box over application pages. */
+.bet-statusbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 62px;
+  padding: 10px 14px 10px 12px;
+  border-radius: var(--radius-tile);
+  color: var(--ink);
+  font-family: var(--font-body);
+}
+.bet-statusbar .bet { width: 30px; height: 26px; }
+.bet-statusbar-text { flex: 1; min-width: 0; display: grid; gap: 1px; }
+.bet-statusbar-text b { font-size: 14px; font-weight: 500; }
+.bet-statusbar-text span { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bet-statusbar-ring { --p: 0; position: relative; flex: none; display: grid; place-items: center; width: 32px; height: 32px; }
+.bet-statusbar-ring svg.ring { position: absolute; inset: 0; transform: rotate(-90deg); }
+.bet-statusbar-ring circle { fill: none; stroke-width: 3; }
+.bet-statusbar-ring .trk { stroke: color-mix(in srgb, var(--ink) 12%, transparent); }
+.bet-statusbar-ring .bar { stroke: var(--primary); stroke-linecap: round; stroke-dasharray: var(--p) 100; transition: stroke-dasharray 0.35s ease; }
+.bet-statusbar-ring .ok { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--chip-green); color: var(--chip-green-ink); opacity: 0; transform: scale(0.5); transition: opacity 0.3s ease, transform var(--dur-open) var(--ease-spring); }
+.bet-statusbar.is-ready .bet-statusbar-ring .ok { opacity: 1; transform: none; }
+.bet-statusbar.is-ready .bet-statusbar-ring svg.ring { opacity: 0; transition: opacity var(--dur-fast) ease; }
+/* Wait dots: shown only after 600ms of waiting, three quiet dots in a small glass capsule */
+.bet-wait {
+  display: inline-flex;
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--surface) 78%, transparent);
+  box-shadow: 0 0 0 1px var(--glass-edge), 0 6px 16px -10px rgba(20, 20, 20, 0.4);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+.bet-wait i { width: 5px; height: 5px; border-radius: 50%; background: var(--muted); opacity: 0.35; }
+@media (prefers-reduced-motion: no-preference) {
+  .bet-wait i { animation: bet-wait-dot 1.2s ease-in-out infinite; }
+  .bet-wait i:nth-child(2) { animation-delay: 0.16s; }
+  .bet-wait i:nth-child(3) { animation-delay: 0.32s; }
+}
+@keyframes bet-wait-dot { 0%, 70%, 100% { opacity: 0.35; } 35% { opacity: 0.9; } }
+/* Spinner: inside a busy button only */
+.bet-spin { display: inline-block; width: 18px; height: 18px; border-radius: 50%; border: 2px solid color-mix(in srgb, currentColor 35%, transparent); border-top-color: currentColor; animation: bet-spin 0.7s linear infinite; }
+@keyframes bet-spin { to { transform: rotate(360deg); } }
+/* Progress line: set --p (0 to 1) */
+.bet-progress { --p: 0; height: 4px; border-radius: 2px; background: var(--hairline); overflow: hidden; }
+.bet-progress > i { display: block; height: 100%; border-radius: inherit; background: var(--primary); transform-origin: 0 50%; transform: scaleX(var(--p)); transition: transform 0.35s ease; }
+/* Done: a tick on a blue circle, then one plain line */
+.bet-done { display: grid; justify-items: center; align-content: center; gap: 14px; text-align: center; }
+.bet-done-mark { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: var(--primary-soft); color: var(--primary); }
+.bet-done-mark .bet-pxi { width: 21px; height: 21px; }
+.bet-done-title { margin: 0; font-family: var(--font-display); font-weight: var(--title-weight); font-size: 1.5rem; line-height: 1.2; letter-spacing: -0.025em; color: var(--ink); }
+.bet-done-sub { margin: 0; max-width: 40ch; color: var(--muted); font-size: 0.95rem; line-height: 1.5; text-wrap: pretty; }
+/* Empty state: a card standing where the list's cards would be, on the list's left edge. The crew member whose list
+   it is, then what will show up here (.bet-empty-h, in ink) and what to do now (muted), and at most one button.
+   Never a centred paragraph floating in an empty column. A list that is still loading uses the same card with the
+   wait dots in the member's place, so nothing jumps when it arrives empty. */
+.bet-empty { display: flex; align-items: center; gap: 20px; padding: 20px 24px; border-radius: var(--radius-app-card); background: var(--surface); box-shadow: var(--shadow-card); color: var(--muted); }
+.bet-empty > .bet { flex: none; width: 48px; height: 42px; }
+.bet-empty > .bet-wait { flex: none; }
+.bet-empty-t { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; }
+.bet-empty p { margin: 0; max-width: 62ch; font-size: 0.95rem; line-height: 1.5; text-wrap: pretty; }
+.bet-empty .bet-empty-h { font-family: var(--font-display); font-weight: var(--title-weight); font-size: 1.15rem; line-height: 1.3; letter-spacing: -0.03em; color: var(--ink); text-wrap: balance; }
+.bet-empty .bet-btn { margin-top: 10px; }
+@media (max-width: 699px) { .bet-empty { align-items: flex-start; gap: 16px; padding: 18px; } }
+
+/* ---------- Dialog, toast, menu (product additions, built from the panel and the glass) ---------- */
+.bet-dialog {
+  width: min(520px, calc(100% - 32px));
+  max-height: calc(100% - 48px);
+  margin: auto;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-tile);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-panel), var(--shadow-raised);
+  overflow: auto;
+}
+.bet-dialog::backdrop { background: rgba(20, 20, 20, 0.32); }
+.bet-dialog[open] { animation: bet-view-in 0.4s var(--ease-out-soft); }
+.bet-dialog-body { display: grid; gap: 10px; padding: 28px 28px 8px; }
+.bet-dialog-title { margin: 0; font-family: var(--font-display); font-weight: var(--title-weight); font-size: 1.3rem; line-height: 1.25; letter-spacing: -0.025em; }
+.bet-dialog-body p { margin: 0; color: var(--muted); font-size: 0.97rem; line-height: 1.55; }
+.bet-dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; padding: 20px 28px 28px; }
+.bet-toast {
+  position: fixed;
+  z-index: 40;
+  left: 50%;
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: calc(100% - 32px);
+  padding: 8px 8px 8px 20px;
+  border-radius: var(--radius-pill);
+  color: var(--ink);
+  font-size: 0.92rem;
+  font-weight: 500;
+  translate: -50% 0;
+}
+.bet-toast .bet-btn-quiet { color: var(--primary); }
+.bet-toast:not(.is-on) { opacity: 0; transform: translateY(16px) scale(0.96); visibility: hidden; pointer-events: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .bet-toast { transition: opacity 0.3s ease, transform var(--dur-open) var(--ease-out-soft), visibility 0s; }
+  .bet-toast:not(.is-on) { transition: opacity 0.3s ease, transform var(--dur-open) var(--ease-out-soft), visibility 0s linear 0.3s; }
+}
+.bet-menu { display: grid; gap: 2px; min-width: 200px; padding: 6px; border-radius: var(--radius-panel); }
+.bet-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 38px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+.bet-menu-item:hover, .bet-menu-item:focus-visible { background: color-mix(in srgb, var(--ink) 6%, transparent); outline: none; text-decoration: none; }
+.bet-menu-item.is-danger { color: var(--err); }
+.bet-menu hr { height: 1px; margin: 4px 8px; border: 0; background: linear-gradient(90deg, transparent, var(--line) 10%, var(--line) 90%, transparent); }
+/* Select: every dropdown opens as the glass menu above (6px padding, 16px corners, 38px items, ink 6% hover), with
+   the pixel check on the chosen line, instead of the system's own list. Chromium's customizable select; Safari and
+   Firefox keep their own list. The closed field keeps whatever look its page gives it. It opens downward and fits the
+   room left under the field (100% is that room, since position-area makes it the containing block), scrolling if it
+   is longer, and flips up only when less than 160px is left below. A long choice ends in "..." when the page puts a
+   <button data-fit><selectedcontent></selectedcontent></button> first in the select (the browser copies the choice
+   in); use selectedOptions to read the choice, since textContent then includes the copy. */
+@supports (appearance: base-select) {
+  select, ::picker(select) { appearance: base-select !important; }
+  select::picker-icon { display: none; }
+  select > button[data-fit] { all: unset; display: block; flex: 1 1 auto; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; cursor: inherit; }
+  select { align-items: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  ::picker(select) {
+    position-area: block-end span-inline-end;
+    position-try-order: normal;
+    position-try-fallbacks: flip-block;
+    min-width: max(anchor-size(width), 200px);
+    max-height: max(min(360px, 60vh, 100% - 18px), 160px);
+    margin-block: 6px;
+    padding: 6px;
+    border: 0;
+    border-radius: var(--radius-panel);
+    background: linear-gradient(180deg, var(--glass-a), var(--glass-b));
+    -webkit-backdrop-filter: blur(16px) saturate(1.8);
+    backdrop-filter: blur(16px) saturate(1.8);
+    box-shadow: var(--shadow-glass);
+    color: var(--ink);
+    font-size: 0.9rem;
+    font-weight: 500;
+    scrollbar-width: thin;
+    transform-origin: top center;
+  }
+  select option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 38px;
+    padding: 0 12px;
+    border-radius: var(--radius-sm);
+    background: none;
+    color: var(--ink);
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  select option:hover, select option:focus-visible { background: color-mix(in srgb, var(--ink) 6%, transparent); outline: none; }
+  select option:checked { font-weight: 600; }
+  select option:disabled { color: var(--muted); cursor: default; }
+  select option::checkmark {
+    order: 1;
+    content: "";
+    flex: none;
+    width: 14px;
+    height: 14px;
+    margin-left: auto;
+    background: var(--primary);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 7' shape-rendering='crispEdges'%3E%3Cpath d='M0 3h1v1H0zM1 3h1v1H1zM1 4h1v1H1zM2 4h1v1H2zM2 5h1v1H2zM3 3h1v1H3zM3 4h1v1H3zM4 2h1v1H4zM4 3h1v1H4zM5 1h1v1H5zM5 2h1v1H5zM6 1h1v1H6z'/%3E%3C/svg%3E") center / 14px no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 7' shape-rendering='crispEdges'%3E%3Cpath d='M0 3h1v1H0zM1 3h1v1H1zM1 4h1v1H1zM2 4h1v1H2zM2 5h1v1H2zM3 3h1v1H3zM3 4h1v1H3zM4 2h1v1H4zM4 3h1v1H4zM5 1h1v1H5zM5 2h1v1H5zM6 1h1v1H6z'/%3E%3C/svg%3E") center / 14px no-repeat;
+  }
+  select option:not(:checked)::checkmark { visibility: hidden; }
+  @media (prefers-reduced-motion: no-preference) {
+    select:open::picker(select) { animation: bet-glass-in 0.45s var(--ease-out-soft) both; }
+  }
+}
+
+/* ---------- Bet, the octopus ----------
+   16 x 14 pixels, always at that ratio (width x 0.875). It bobs, blinks and walks; .is-standing keeps its legs
+   still; .is-still stops everything (also what reduced motion gets). Sizes: 16, 24, 32, 44, 56, 84, 230. */
+svg.bet { display: inline-block; width: 44px; height: 38.5px; flex: none; overflow: visible; vertical-align: middle; }
+.bet .bet-body { animation: bet-bob 2.4s ease-in-out infinite; transform-box: fill-box; }
+.bet .eyes-shut, .bet .legs-b { opacity: 0; }
+.bet .eyes-open { animation: bet-blink 4.2s steps(1, end) infinite; }
+.bet .eyes-shut { animation: bet-blink-shut 4.2s steps(1, end) infinite; }
+.bet .legs-a { animation: bet-legs 0.9s steps(1, end) infinite; }
+.bet .legs-b { animation: bet-legs-alt 0.9s steps(1, end) infinite; }
+.bet.is-standing .legs-a, .bet.is-standing .legs-b { animation: none; }
+.bet.is-standing .legs-b { opacity: 0; }
+.bet.is-still .bet-body, .bet.is-still .eyes-open, .bet.is-still .legs-a { animation: none; }
+.bet.is-still .eyes-shut, .bet.is-still .legs-b { animation: none; opacity: 0; }
+.bet-16 { width: 16px !important; height: 14px !important; }
+.bet-24 { width: 24px !important; height: 21px !important; }
+.bet-32 { width: 32px !important; height: 28px !important; }
+.bet-56 { width: 56px !important; height: 49px !important; }
+.bet-84 { width: 84px !important; height: 73.5px !important; }
+.bet-230 { width: 230px !important; height: 201.25px !important; }
+/* The big one floats and casts a soft shadow (hero, empty pages) */
+.bet-float { --bw: 230px; display: block; filter: drop-shadow(0 calc(var(--bw) * 0.11) calc(var(--bw) * 0.17) color-mix(in srgb, #4b2ea3 30%, transparent)); opacity: 0.94; }
+.bet-float .bet-body { animation: none; }
+.bet-float .legs-a, .bet-float .legs-b { animation-duration: 1.1s; animation-play-state: paused; }
+.bet-float .eyes-open, .bet-float .eyes-shut { animation-duration: 5.1s; }
+.bet-float.is-walking .legs-a, .bet-float.is-walking .legs-b { animation-play-state: running; }
+@media (prefers-reduced-motion: no-preference) {
+  .bet-float { animation: bet-in 1.3s var(--ease-out) 0.55s backwards, bet-hover 6.5s ease-in-out 0.55s infinite; }
+}
+.bet-absorb { animation: bet-absorb 0.45s var(--ease-spring); transform-origin: 50% 60%; }
+@keyframes bet-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-1px); } }
+@keyframes bet-blink { 0% { opacity: 1; } 92% { opacity: 0; } 96% { opacity: 1; } }
+@keyframes bet-blink-shut { 0% { opacity: 0; } 92% { opacity: 1; } 96% { opacity: 0; } }
+@keyframes bet-legs { 0% { opacity: 1; } 50% { opacity: 0; } }
+@keyframes bet-legs-alt { 0% { opacity: 0; } 50% { opacity: 1; } }
+@keyframes bet-in { from { scale: 0.5; opacity: 0; translate: 0 40px; } to { scale: 1; opacity: 1; translate: 0 0; } }
+@keyframes bet-hover { 0%, 100% { transform: translateY(0) rotate(-1.6deg); } 50% { transform: translateY(-9%) rotate(1.6deg); } }
+@keyframes bet-absorb { 0% { transform: none; } 40% { transform: scale(1.14); } 100% { transform: none; } }
+
+/* ---------- Pixel icons ----------
+   Every icon is pixel art. Tile icons (.bet-pi): a 5x5 drawing on a 7x7 tile, two-tone (primary on primary-soft),
+   21px (14px small). Glyphs (.bet-pxi): one colour (currentColor) on a 7x7 or 9x9 grid at 2px a pixel, so 14px or
+   18px; 21px where a glyph stands alone. Every pixel has a draw order (--i). They draw themselves in the first time
+   they're seen, change colour pixel by pixel on hover, and swap pixel by pixel. */
+.bet-pi { flex: none; display: block; width: 21px; height: 21px; }
+.bet-pi .pi-t { fill: var(--primary-soft); }
+.bet-pi .pi-p rect, .bet-pi .pi-p { fill: var(--primary); }
+.bet-pi-sm { width: 14px; height: 14px; }
+.bet-pi-muted .pi-t { fill: color-mix(in srgb, var(--ink) 6%, transparent); }
+.bet-pi-muted .pi-p rect { fill: color-mix(in srgb, var(--ink) 26%, transparent); }
+.bet-pxi { flex: none; display: block; width: 14px; height: 14px; overflow: visible; }
+.bet-pxi rect { fill: currentColor; }
+.bet-pxi[viewBox="0 0 9 9"] { width: 18px; height: 18px; }
+.bet-pxi[viewBox="0 0 5 5"] { width: 10px; height: 10px; }
+.bet-pxi-lg, .bet-pxi-lg[viewBox] { width: 21px; height: 21px; }
+@media (prefers-reduced-motion: no-preference) {
+  .bet-pi .pi-p rect, .bet-pxi rect {
+    transition: opacity 0s linear calc(var(--i, 0) * var(--pxs, 30ms)), fill 0s linear calc(var(--i, 0) * var(--pxs, 30ms));
+  }
+  .bet-px-draw .bet-pi:not(.is-drawn) .pi-p rect, .bet-px-draw .bet-pxi:not(.is-drawn) rect { opacity: 0; }
+}
+@media (hover: hover) {
+  .bet-icon-btn:hover .bet-pxi rect, .bet-btn-light:hover .bet-pxi rect, .bet-btn-outline:hover .bet-pxi rect,
+  .bet-btn-ghost:hover .bet-pxi rect, .bet-btn-quiet:hover .bet-pxi rect, .bet-faq-q button:hover .bet-pxi rect { fill: var(--primary); }
+  .bet-btn:not(.bet-btn-ghost):not(.bet-btn-outline):not(.bet-btn-quiet):not(.bet-btn-light):hover .bet-pxi rect,
+  .bet-copy:hover .bet-copy-icon .bet-pxi rect, .bet-role:hover .bet-role-apply .bet-pxi rect { fill: var(--primary-inv); }
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .bet-pill:hover .bet-pi .pi-p rect, .bet-tile:hover .bet-pi .pi-p rect { animation: bet-px-redraw 1ms calc(var(--i, 0) * var(--pxs, 30ms)) backwards; }
+}
+@keyframes bet-px-redraw { from, to { opacity: 0; } }
+/* Two glyphs in one place that swap pixel by pixel (copy and tick, sun and moon): put both in .bet-swap */
+.bet-swap { display: grid; place-items: center; }
+.bet-swap > svg { grid-area: 1 / 1; }
+.bet-swap > .is-b rect, .bet-swap.is-swapped > .is-a rect { opacity: 0; }
+.bet-swap.is-swapped > .is-b rect { opacity: 1; }
+/* The chevron holds both states (.pxa down, .pxb up) */
+.bet-pxi .pxb rect, [aria-expanded="true"] .bet-pxi .pxa rect, .is-open > * .bet-pxi .pxa rect { opacity: 0; }
+[aria-expanded="true"] .bet-pxi .pxb rect, .is-open > * .bet-pxi .pxb rect { opacity: 1; }
+
+/* ---------- Pixel bands and Bet's sea friends ---------- */
+:root, :host {
+  --px-dots: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 20 20' shape-rendering='crispEdges'><path d='M0 0h2v2H0zM10 0h2v2h-2zM5 10h2v2H5zM15 10h2v2h-2z'/></svg>");
+  --bub-o: 1;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bub-o: 0.4; } }
+[data-theme="dark"], :host([data-theme="dark"]) { --bub-o: 0.4; }
+/* A band between sections: 1px dots on a staggered 5px grid, 96px tall, with four blocks of page colour stepping
+   into its top edge across the first columns of a six-column grid. The ends fade like every divider. */
+.bet-band {
+  --c: calc((100% - 108px) / 6);
+  position: relative;
+  z-index: 2;
+  height: 96px;
+  pointer-events: none;
+}
+.bet-band::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--px-dot);
+  -webkit-mask: var(--px-dots) 0 0 / 10px 10px, linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+  -webkit-mask-composite: source-in;
+  mask: var(--px-dots) 0 0 / 10px 10px, linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+  mask-composite: intersect;
+}
+.bet-band > i { position: absolute; background: var(--band-bg, var(--bg)); }
+.bet-band > i:nth-child(1) { left: 0; top: 12px; width: calc(24px + var(--c)); height: 36px; }
+.bet-band > i:nth-child(2) { left: calc(24px + var(--c)); top: 0; width: calc(12px + var(--c)); height: 12px; }
+.bet-band > i:nth-child(3) { left: calc(36px + 2 * var(--c)); top: 12px; width: calc(12px + var(--c)); height: 24px; }
+.bet-band > i:nth-child(4) { left: calc(48px + 3 * var(--c)); top: 0; width: 12px; height: 12px; }
+@media (max-width: 767px) { .bet-band { height: 48px; } }
+.bet-sprite { display: block; width: 100%; height: auto; }
+/* The fish swims through a band once when it comes into view (at most every 20 seconds), blowing bubbles */
+.bet-swim { position: absolute; left: 0; top: 52px; width: 39px; opacity: 0; pointer-events: none; }
+.bet-swim.is-on { animation: bet-swim var(--swim, 9s) linear forwards; }
+.bet-swim.is-on .bet-swim-bob { display: block; animation: bet-px-bob 1.1s steps(1, end) infinite; }
+.bet-swim-bubble { position: absolute; width: 12px; animation: bet-px-rise 1.8s steps(6, end) forwards; }
+/* The crab sits on a band, blinks and shuffles now and then, and hops when you point at it */
+.bet-crab { position: absolute; bottom: 100%; left: 74%; width: 45px; pointer-events: auto; }
+.bet-crab .fb, .bet-crab .lid { opacity: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .bet-crab .bet-sprite { animation: bet-crab-step 9s steps(1, end) infinite; }
+  .bet-crab .fa { animation: bet-crab-fa 9s steps(1, end) infinite; }
+  .bet-crab .fb { animation: bet-crab-fb 9s steps(1, end) infinite; }
+  .bet-crab .lid { animation: bet-crab-blink 9s steps(1, end) infinite; }
+  .bet-crab { transition: translate 0.16s steps(2, end); }
+  .bet-crab:hover { translate: 0 -9px; }
+}
+@media (prefers-reduced-motion: reduce) { .bet-swim { display: none; } }
+@media (max-width: 767px) {
+  .bet-swim { top: 22px; width: 26px; }
+  .bet-swim-bubble { width: 8px; }
+  .bet-crab { width: 30px; left: 70%; }
+}
+@keyframes bet-swim { 0% { transform: translateX(-60px); opacity: 0; } 7%, 93% { opacity: 1; } 100% { transform: translateX(calc(var(--bw, 1240px) + 20px)); opacity: 0; } }
+@keyframes bet-px-bob { 0% { translate: 0 0; } 50% { translate: 0 -3px; } }
+@keyframes bet-px-rise { 0% { translate: 0 0; opacity: 1; } 100% { translate: 3px -30px; opacity: 0; } }
+@keyframes bet-crab-step { 0%, 56% { translate: 0 0; } 58% { translate: 3px 0; } 60% { translate: 6px 0; } 62% { translate: 9px 0; } 70% { translate: 6px 0; } 72% { translate: 3px 0; } 74%, 100% { translate: 0 0; } }
+@keyframes bet-crab-fa { 0%, 56% { opacity: 1; } 58% { opacity: 0; } 60% { opacity: 1; } 62% { opacity: 0; } 70% { opacity: 1; } 72% { opacity: 0; } 74%, 100% { opacity: 1; } }
+@keyframes bet-crab-fb { 0%, 56% { opacity: 0; } 58% { opacity: 1; } 60% { opacity: 0; } 62% { opacity: 1; } 70% { opacity: 0; } 72% { opacity: 1; } 74%, 100% { opacity: 0; } }
+@keyframes bet-crab-blink { 0%, 30% { opacity: 0; } 31% { opacity: 1; } 32.5%, 88% { opacity: 0; } 89% { opacity: 1; } 90.5%, 100% { opacity: 0; } }
+/* ---------- The crew: Bloop (svg.bet above), Eco the fish and Tango the crab ----------
+   The three draw at one pixel size (--ps) so they stay in scale: Bloop 16 x 14, Eco 13 x 8, Tango 15 x 11.
+   .bet-px1 to .bet-px4 set the pixel size (2px beside a chat line, 2.75 beside the 44px Bloop, 3 to 4 alone).
+   .is-still stops the idling (a logo, reduced motion). */
+.bet-eco, .bet-tango { --ps: 2.75px; position: relative; display: inline-block; flex: none; vertical-align: middle; line-height: 0; }
+.bet-eco { width: calc(13 * var(--ps)); height: calc(8 * var(--ps)); }
+.bet-tango { width: calc(15 * var(--ps)); height: calc(11 * var(--ps)); }
+.bet-eco > .bet-sprite, .bet-tango > .bet-sprite { width: 100%; height: 100%; overflow: visible; }
+.bet-px1 { --ps: 1px; } .bet-px2 { --ps: 2px; } .bet-px3 { --ps: 3px; } .bet-px4 { --ps: 4px; }
+.bet-tango .fb, .bet-tango .lid { opacity: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  /* Eco holds its place in the water: a pixel up, a pixel forward, on Bloop's beat */
+  .bet-eco:not(.is-still) > .bet-sprite { animation: bet-eco-idle 2.4s steps(1, end) infinite; }
+  /* Tango blinks and takes a step sideways now and then (the band crab's cycle, scaled to its pixel) */
+  .bet-tango:not(.is-still) > .bet-sprite { animation: bet-tango-step 9s steps(1, end) infinite; }
+  .bet-tango:not(.is-still) .fa { animation: bet-crab-fa 9s steps(1, end) infinite; }
+  .bet-tango:not(.is-still) .fb { animation: bet-crab-fb 9s steps(1, end) infinite; }
+  .bet-tango:not(.is-still) .lid { animation: bet-crab-blink 9s steps(1, end) infinite; }
+}
+@keyframes bet-eco-idle { 0%, 100% { translate: 0 0; } 30% { translate: 0 calc(-1 * var(--ps)); } 55% { translate: var(--ps) calc(-1 * var(--ps)); } 80% { translate: var(--ps) 0; } }
+@keyframes bet-tango-step { 0%, 56% { translate: 0 0; } 58% { translate: var(--ps) 0; } 60% { translate: calc(2 * var(--ps)) 0; } 62% { translate: calc(3 * var(--ps)) 0; } 70% { translate: calc(2 * var(--ps)) 0; } 72% { translate: var(--ps) 0; } 74%, 100% { translate: 0 0; } }
+/* The "meet the crew" strip: three members in a row, each on one baseline, a name in its colour and one line */
+.bet-crew { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: center; gap: 16px 40px; margin: 0; padding: 0; list-style: none; }
+.bet-crew-member { display: grid; align-content: start; justify-items: center; gap: 8px; max-width: 200px; text-align: center; }
+.bet-crew-stage { display: flex; align-items: flex-end; justify-content: center; height: 42px; }
+.bet-crew-stage .bet { width: 48px; height: 42px; }
+.bet-crew-stage .bet-eco, .bet-crew-stage .bet-tango { --ps: 3px; }
+.bet-crew-name { margin: 0; font-family: var(--font-display); font-weight: var(--title-weight); font-size: 1rem; line-height: 1.2; letter-spacing: -0.015em; color: var(--ink); }
+.bet-crew-role { margin: 0; color: var(--muted); font-size: 0.9rem; line-height: 1.45; text-wrap: balance; }
+.is-bloop { color: var(--crew-bloop); } .is-eco { color: var(--crew-eco); } .is-tango { color: var(--crew-tango); }
+@media (max-width: 560px) { .bet-crew { gap: 14px 10px; } .bet-crew-member { max-width: 108px; gap: 6px; } .bet-crew-role { font-size: 0.82rem; } }
+/* A chat line said by Eco or Tango: the fish or crab in the octopus's slot (2px a pixel), and the speaker's name
+   over the first line of a run (.bet-chat-who), the way a group chat shows who is talking */
+.bet-chat-line > .bet-eco, .bet-chat-line > .bet-tango { --ps: 2px; margin-bottom: 3px; }
+/* Centred in Bloop's 16-pixel width (Eco is 13 wide, Tango 15), so every speaker's bubble starts at the same line */
+.bet-chat-line > .bet-eco { margin-inline: calc(1.5 * var(--ps)); }
+.bet-chat-line > .bet-tango { margin-inline: calc(0.5 * var(--ps)); }
+.bet-chat-who { display: block; margin: 4px 0 -4px 42px; font-family: var(--font-display); font-weight: var(--title-weight); font-size: 0.78rem; line-height: 1.4; letter-spacing: -0.01em; color: var(--muted); }
+/* An empty state with Eco or Tango in Bloop's place (3px a pixel, beside the 48px octopus) */
+.bet-empty > .bet-eco, .bet-empty > .bet-tango { flex: none; --ps: 3px; }
+/* Hearts: a few float up from a button that just did something nice (copied, saved) */
+.bet-heart { position: fixed; z-index: 30; width: 14px; pointer-events: none; animation: bet-heart 1.1s steps(8, end) both; }
+@keyframes bet-heart { 0% { translate: 0 0; opacity: 1; } 70% { opacity: 1; } 100% { translate: var(--hx, 0px) -46px; opacity: 0; } }
+/* White pixel bubbles drifting up through a colour field, mostly at the sides. Fainter on dark. */
+.bet-bubbles { position: absolute; inset: 0; z-index: -2; overflow: hidden; pointer-events: none; opacity: var(--bub-o); }
+.bet-bubbles i {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: calc(var(--s) * 6px);
+  aspect-ratio: 1;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 6 6' shape-rendering='crispEdges'><rect x='1' y='0' width='4' height='1' fill='%23ffffff'/><rect x='0' y='1' width='1' height='1' fill='%23ffffff'/><rect x='1' y='1' width='1' height='1' fill='%23ffffff'/><rect x='5' y='1' width='1' height='1' fill='%23ffffff'/><rect x='0' y='2' width='1' height='1' fill='%23ffffff'/><rect x='5' y='2' width='1' height='1' fill='%23ffffff'/><rect x='0' y='3' width='1' height='1' fill='%23ffffff'/><rect x='5' y='3' width='1' height='1' fill='%23ffffff'/><rect x='0' y='4' width='1' height='1' fill='%23ffffff'/><rect x='5' y='4' width='1' height='1' fill='%23ffffff'/><rect x='1' y='5' width='4' height='1' fill='%23ffffff'/></svg>") center / 100% 100% no-repeat;
+  image-rendering: pixelated;
+  opacity: var(--o);
+}
+.bet-bubbles i.sm { width: calc(var(--s) * 4px); background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 4' shape-rendering='crispEdges'><rect x='1' y='0' width='2' height='1' fill='%23ffffff'/><rect x='0' y='1' width='1' height='1' fill='%23ffffff'/><rect x='1' y='1' width='1' height='1' fill='%23ffffff'/><rect x='3' y='1' width='1' height='1' fill='%23ffffff'/><rect x='0' y='2' width='1' height='1' fill='%23ffffff'/><rect x='3' y='2' width='1' height='1' fill='%23ffffff'/><rect x='1' y='3' width='2' height='1' fill='%23ffffff'/></svg>"); }
+@media (prefers-reduced-motion: no-preference) {
+  .bet-bubbles { animation: bet-fade-in 1.4s ease-out 0.4s backwards; }
+  .bet-bubbles i { top: 100%; opacity: 0; animation: bet-bubble-up var(--t) linear var(--d) infinite, bet-bubble-sway 3.6s steps(1, end) var(--d) infinite; }
+}
+@keyframes bet-bubble-up { 0% { transform: translateY(0); opacity: 0; } 8%, 82% { opacity: var(--o); } 100% { transform: translateY(calc(-100svh - 80px)); opacity: 0; } }
+@keyframes bet-bubble-sway { 0% { translate: 0 0; } 25% { translate: 3px 0; } 50% { translate: 0 0; } 75% { translate: -3px 0; } }
+
+/* ---------- Motion helpers ---------- */
+/* Scroll reveal: only things below the first screen wait (bet.js reveal() adds .is-pending, then removes it) */
+@media (prefers-reduced-motion: no-preference) {
+  [data-bet-reveal] { transition: opacity var(--dur-appear) ease, transform var(--dur-reveal) var(--ease-out); transition-delay: var(--d, 0s); }
+  [data-bet-reveal].is-pending { opacity: 0; transform: translateY(32px); }
+  [data-bet-reveal="words"] .w { display: inline-block; overflow: hidden; vertical-align: bottom; padding: 0 0.08em 0.1em; margin: 0 -0.08em -0.1em; }
+  [data-bet-reveal="words"] .w > span { display: inline-block; transition: transform 0.8s var(--ease-out); transition-delay: var(--d, 0s); }
+  [data-bet-reveal="words"].is-pending { opacity: 1; transform: none; }
+  [data-bet-reveal="words"].is-pending .w > span { transform: translateY(105%); }
+  /* Appear (cards in a list): rise 60px over 0.6s, 0.1s late. Add .is-in when half of it is on screen. */
+  .bet-js .bet-appear:not(.is-in) { opacity: 0; transform: translateY(60px); }
+  .bet-js .bet-appear.bet-appear-scale:not(.is-in) { transform: translateY(60px) scale(0.8); }
+  .bet-appear.is-in { transition: opacity var(--dur-appear) var(--ease-std) 0.1s, transform var(--dur-appear) var(--ease-std) 0.1s; }
+  /* Rise: a page or view settling in once on load (stagger with --d) */
+  .bet-rise { animation: bet-rise var(--dur-rise) var(--ease-out) backwards; animation-delay: var(--d, 0s); }
+  .bet-view-in { animation: bet-view-in 0.4s var(--ease-out-soft); }
+  /* Hero words: each word rises out of its own clipping box */
+  .bet-words .w { display: inline-block; vertical-align: bottom; padding: 0.16em 0.06em 0.22em; margin: -0.16em -0.06em -0.22em; overflow: hidden; }
+  .bet-words .w > span { display: inline-block; animation: bet-word-up 0.95s var(--ease-out) backwards; animation-delay: calc(1.05s + var(--d, 0s)); }
+  .bet-pop-in { animation: bet-pop-up 0.85s var(--ease-pop) backwards; animation-delay: var(--d, 0s); }
+}
+@keyframes bet-rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@keyframes bet-view-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes bet-word-up { from { transform: translateY(140%); } to { transform: none; } }
+@keyframes bet-pop-up { from { opacity: 0; transform: translateY(18px) scale(0.92); } to { opacity: 1; transform: none; } }
+/* Off screen, nothing animates: bet.js offscreen() toggles .bet-anim-off on sections with endless loops */
+.bet-anim-off, .bet-anim-off *, .bet-anim-off *::before, .bet-anim-off *::after { animation-play-state: paused !important; }
+/* Smooth scrolling (Lenis, desktop pointers only) */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+/* ---------- Site footer: brand line, link columns, the giant faded wordmark, copyright ---------- */
+.bet-footer-in { width: min(1240px, 100% - 40px); margin-inline: auto; border-top: 1.5px solid transparent; border-image: linear-gradient(90deg, transparent, var(--tile-line) 10%, var(--tile-line) 90%, transparent) 1; }
+.bet-footer-top { display: flex; align-items: flex-start; gap: 48px; padding: 80px 0 64px; }
+.bet-footer-brand { flex: 1 0 0; min-width: 0; display: grid; gap: 20px; justify-items: start; }
+.bet-footer-tagline { margin: 0; max-width: 18em; font-family: var(--font-display); font-weight: 500; font-size: clamp(1.35rem, 2.1vw, 1.75rem); line-height: 1.18; letter-spacing: -0.035em; color: var(--ink); text-wrap: balance; }
+.bet-footer-tagline em { display: block; font-style: normal; color: var(--primary); }
+.bet-footer-cols { display: grid; grid-template-columns: repeat(2, minmax(max-content, 112px)) max-content; gap: 48px; align-items: start; }
+.bet-footer-col { display: grid; gap: 14px; align-content: start; justify-items: start; }
+.bet-footer-col-title { margin: 0; font-family: var(--font-display); font-weight: 500; font-size: 0.82rem; color: var(--ink); }
+.bet-footer-col a { color: var(--muted); font-weight: 400; text-decoration: none; font-size: 0.95rem; line-height: 1.4; transition: color var(--dur-fast) ease; }
+.bet-footer-col a:hover, .bet-footer-col a[aria-current] { color: var(--ink); text-decoration: none; }
+.bet-footer-mark {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.05em;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(7rem, 37vw, 31rem);
+  line-height: 0.8;
+  letter-spacing: -0.05em;
+  color: color-mix(in srgb, var(--ink) 15%, transparent);
+  -webkit-mask-image: linear-gradient(0deg, #000 0%, rgba(0, 0, 0, 0.4) 70%, transparent 100%);
+  mask-image: linear-gradient(0deg, #000 0%, rgba(0, 0, 0, 0.4) 70%, transparent 100%);
+  user-select: none;
+  pointer-events: none;
+  overflow: hidden;
+}
+.bet-footer-mark .bet { flex: none; width: 0.8em; height: 0.7em; opacity: 0.55; }
+.bet-footer-bottom { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 6px 16px; padding: 20px 0; border-top: 1px solid transparent; border-image: linear-gradient(90deg, transparent, var(--line) 10%, var(--line) 90%, transparent) 1; font-size: 0.78rem; font-weight: 500; color: var(--muted); }
+.bet-footer-bottom p { margin: 0; }
+@media (max-width: 960px) { .bet-footer-top { gap: 32px; padding: 72px 0 56px; } .bet-footer-cols { gap: 32px; } }
+@media (max-width: 760px) {
+  .bet-footer-top { flex-direction: column; gap: 36px; padding: 56px 0 48px; }
+  .bet-footer-cols { width: 100%; grid-template-columns: repeat(3, minmax(max-content, 1fr)); gap: 20px; }
+}
+
+/* ---------- Reduced motion: the octopus stands still, nothing scrolls smoothly ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .bet .bet-body, .bet .eyes-open, .bet .eyes-shut, .bet .legs-a, .bet .legs-b { animation: none; }
+  .bet-new::before, .bet-swirl, .bet-wait i { animation: none; }
+}
+
+/* ---------- Liquid motion: glass under the finger ----------
+   A glass button or pill lifts a little on hover, squashes when pressed and springs back when let go; a toast or a
+   menu lands like a drop; the top bar flexes with the scroll and settles (Bet.glass). */
+.bet-btn-ghost, .bet-pill, .bet-role-apply, a.bet-glass, button.bet-glass, a[data-bet-glass], button[data-bet-glass] {
+  transition: transform 0.6s var(--ease-spring), background-color var(--dur) ease, box-shadow var(--dur) ease, color var(--dur) ease;
+}
+.bet-btn-ghost:hover, .bet-pill:hover, a.bet-glass:hover, button.bet-glass:hover, a[data-bet-glass]:hover, button[data-bet-glass]:hover { transform: translateY(-1px) scale(1.03); }
+.bet-btn-ghost:active, .bet-pill:active, .bet-role-apply:active, a.bet-glass:active, button.bet-glass:active, a[data-bet-glass]:active, button[data-bet-glass]:active {
+  transform: scale(0.95);
+  transition-duration: 0.08s;
+}
+@keyframes bet-glass-in {
+  0% { opacity: 0; transform: translateY(14px) scale(0.9); }
+  55% { opacity: 1; transform: translateY(-2px) scale(1.03, 0.97); }
+  100% { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .bet-toast.is-on { animation: bet-glass-in 0.55s var(--ease-out-soft) both; }
+  .bet-menu { animation: bet-glass-in 0.45s var(--ease-out-soft) both; }
+}
