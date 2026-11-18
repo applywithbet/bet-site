@@ -245,7 +245,7 @@ function inboxHtml(d) {
       '</td><td style="padding:10px 0;vertical-align:top;color:#1b1840">' + cellHtml(answer(d, k, long)) + '</td></tr>')
     .join('');
   return '<div style="font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.5;color:#1b1840;max-width:640px">' +
-    '<p style="margin:0 0 4px;color:#6b6880">New application' + (d.team ? ' · ' + esc(clean(d.team, 60)) : '') + '</p>' +
+    '<p style="margin:0 0 4px;color:#6b6880">New application' + (d.team ? ' for ' + esc(clean(d.team, 60)) : '') + '</p>' +
     '<h1 style="margin:0 0 20px;font-size:22px">' + esc(clean(d.role, 120)) + '</h1>' +
     '<table style="border-collapse:collapse;width:100%">' + rows +
     '<tr><td style="padding:10px 16px 10px 0;color:#6b6880">Resume</td><td style="padding:10px 0">Attached: ' + esc(clean(d.resume.name, 200)) + '</td></tr>' +
