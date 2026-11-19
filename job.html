@@ -22,9 +22,9 @@
 <!-- Pixel icons draw themselves in (html.px-draw); not with reduced motion -->
 <script>if(window.IntersectionObserver&&!(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches))document.documentElement.classList.add("px-draw");</script>
 <script>(function(){var t=null;try{t=localStorage.getItem("bet-theme")}catch(e){}if(t!=="light"&&t!=="dark")t=window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.setAttribute("data-theme",t)})();</script>
-<meta name="theme-color" content="#f7f7f4">
+<meta name="theme-color" content="#edeef2">
 <!-- The browser bars and the overscroll area take the page colour (off-white / black), following the theme toggle -->
-<script>(function(){var d=document.documentElement,m=document.querySelector('meta[name="theme-color"]');function s(){m.setAttribute("content",d.getAttribute("data-theme")==="dark"?"#131314":"#f7f7f4")}s();new MutationObserver(s).observe(d,{attributes:true,attributeFilter:["data-theme"]})})();</script>
+<script>(function(){var d=document.documentElement,m=document.querySelector('meta[name="theme-color"]');function s(){m.setAttribute("content",d.getAttribute("data-theme")==="dark"?"#131314":"#edeef2")}s();new MutationObserver(s).observe(d,{attributes:true,attributeFilter:["data-theme"]})})();</script>
 <style>
 /* One job posting, laid out like an Ashby job page: the company logo centred at the top with a back arrow,
    the title, Overview and Application tabs, then one panel with the details on the left and the posting or
@@ -32,7 +32,7 @@
    the neutral page colour, solid panels, ink for the active tab and the buttons, a blue focus ring. No
    purple tint or glow (the user called that "vibe coded"); the octopus is the only purple. */
 :root {
-  --bg: #f7f7f4;              /* off-white page */
+  --bg: #edeef2;              /* light grey page */
   --surface: #ffffff;
   --tint: #f0f4f9;            /* search-bar fill */
   --ink: #1f1f1f;

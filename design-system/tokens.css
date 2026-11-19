@@ -62,7 +62,7 @@
   --measure: 62ch;
   --font-display: "Google Sans Flex", "Google Sans", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-body: Roboto, "Helvetica Neue", Arial, sans-serif;
-  --bg: #f7f7f4;
+  --bg: #edeef2;
   --surface: #ffffff;
   --tint: #f0f4f9;
   --ink: #1f1f1f;
@@ -233,7 +233,7 @@
   color-scheme: dark;
 }
 [data-theme="light"]:not(:root), :host([data-theme="light"]) {
-  --bg: #f7f7f4;
+  --bg: #edeef2;
   --surface: #ffffff;
   --tint: #f0f4f9;
   --ink: #1f1f1f;

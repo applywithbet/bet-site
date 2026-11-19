@@ -1,2 +1,2 @@
 # Palette
-The colours, as tokens. Neutral first: an off-white page, white panels, neutral black ink, one blue for meaning.
+The colours, as tokens. Neutral first: a light grey page, white panels a clear step above it, neutral black ink, one blue for meaning.

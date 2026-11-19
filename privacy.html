@@ -25,9 +25,9 @@
 <!-- Pixel icons draw themselves in (html.px-draw); not with reduced motion -->
 <script>if(window.IntersectionObserver&&!(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches))document.documentElement.classList.add("px-draw");</script>
 <script>(function(){var t=null;try{t=localStorage.getItem("bet-theme")}catch(e){}if(t!=="light"&&t!=="dark")t=window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.setAttribute("data-theme",t)})();</script>
-<meta name="theme-color" content="#f7f7f4">
+<meta name="theme-color" content="#edeef2">
 <!-- The browser bars and the overscroll area take the page colour (off-white / black), following the theme toggle -->
-<script>(function(){var d=document.documentElement,m=document.querySelector('meta[name="theme-color"]');function s(){m.setAttribute("content",d.getAttribute("data-theme")==="dark"?"#131314":"#f7f7f4")}s();new MutationObserver(s).observe(d,{attributes:true,attributeFilter:["data-theme"]})})();</script>
+<script>(function(){var d=document.documentElement,m=document.querySelector('meta[name="theme-color"]');function s(){m.setAttribute("content",d.getAttribute("data-theme")==="dark"?"#131314":"#edeef2")}s();new MutationObserver(s).observe(d,{attributes:true,attributeFilter:["data-theme"]})})();</script>
 <!-- Arriving from another page of the site (html.nav-in): the top bar is already on screen, so it doesn't drop in again -->
 <script>(function(){var d=document.documentElement,k="bet-nav";try{var t=+sessionStorage.getItem(k);sessionStorage.removeItem(k);if(t&&Date.now()-t<5000)d.classList.add("nav-in")}catch(e){}document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest("a[href]");if(!a||a.target||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;var u=new URL(a.href,location.href);if(u.protocol!==location.protocol||u.host!==location.host||u.pathname===location.pathname)return;try{sessionStorage.setItem(k,String(Date.now()))}catch(e){}},true)})();</script>
 <!-- Touch screens scroll natively (html.touch); mouse and trackpad viewers get Lenis smooth scrolling -->
@@ -36,7 +36,7 @@
 /* Privacy Policy. Same system as the landing page (the liquid-glass top bar, faded hairlines and whitespace),
    laid out like the careers page: no hero, the page opens on the document. */
 :root {
-  --bg: #f7f7f4;              /* off-white page */
+  --bg: #edeef2;              /* light grey page */
   --surface: #ffffff;
   --tint: #f0f4f9;            /* search-bar fill */
   --ink: #1f1f1f;

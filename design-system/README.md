@@ -1,6 +1,6 @@
 Bet is a job board that applies for you, and everything it ships should look like one product: the website, the dashboard, the Chrome extension and the app. This is that look, taken from the Bet site (applywithbet.com) value for value. Read this page first, then `USING.md` for how to load the files, then the component guidelines.
 
-**In one breath:** an off-white page (`bg`) with white rounded panels (`surface`) and neutral black ink (`ink`); one blue (`primary`) that only ever means something; Google Sans Flex for headings and Roboto for text; pills for every control; liquid glass for the few things that float; one soft colour field, never anywhere near a form; every icon drawn as pixel art; and a crew of three pixel characters, Bloop, Eco and Tango, standing for everything Bet does by itself. Motion arrives once and settles.
+**In one breath:** a light grey page (`bg`) with white rounded panels (`surface`) that stand clear of it and neutral black ink (`ink`); one blue (`primary`) that only ever means something; Google Sans Flex for headings and Roboto for text; pills for every control; liquid glass for the few things that float; one soft colour field, never anywhere near a form; every icon drawn as pixel art; and a crew of three pixel characters, Bloop, Eco and Tango, standing for everything Bet does by itself. Motion arrives once and settles.
 
 ## Voice and copy
 
