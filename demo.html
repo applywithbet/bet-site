@@ -1002,7 +1002,7 @@ html.lenis, html.lenis body { height: auto; }
   var INBOX = 'applywithbet@gmail.com';
   var FORMSUBMIT = 'https://formsubmit.co/ajax/' + INBOX;
   var SLOW = 10000;      // ms before the page also offers email while it keeps waiting
-  var GIVE_UP = 75000;   // ms before it stops waiting and says it didn't go through
+  var GIVE_UP = 120000;  // ms before it stops waiting and says it didn't go through (FormSubmit took 68 s on 2026-11-20)
   var calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var panel = document.querySelector('.demo-panel');
   var form = panel && panel.querySelector('.bk-form');
@@ -1148,7 +1148,7 @@ html.lenis, html.lenis body { height: auto; }
       else if (--left === 0) finish(false);
     }
     var slow = setTimeout(function () {
-      if (!sent) say(['Still sending. This can take up to a minute. You can also ', mailLink(d, 'email it to us'), '.'], true);
+      if (!sent) say(['Still sending. This can take a minute or two. You can also ', mailLink(d, 'email it to us'), '.'], true);
     }, SLOW);
     var giveUp = setTimeout(function () { finish(false); }, GIVE_UP);
     viaNetlify(d).then(answered);
