@@ -521,6 +521,7 @@ html:not(.js) .theme-toggle { display: none; }
 .bk-status { margin: 0; font-size: 0.9rem; line-height: 1.5; color: var(--bk-err); }
 .bk-status:empty { display: none; }
 .bk-status a { color: inherit; font-weight: 500; text-underline-offset: 3px; }
+.bk-status.is-note { color: var(--muted); }
 .bk-honey { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 .bk-send.is-full { width: 100%; justify-content: center; padding: 11px 24px; }
 .bk-done { align-content: center; justify-items: center; text-align: center; }   /* the panel keeps the form's height; this sits in the middle */
@@ -866,7 +867,8 @@ html.lenis, html.lenis body { height: auto; }
     </div>
     <div class="demo-card">
       <div class="demo-panel">
-        <form class="bk-form" novalidate aria-labelledby="demo-title">
+        <form class="bk-form" name="demo-request" method="POST" data-netlify="true" netlify-honeypot="_honey" novalidate aria-labelledby="demo-title">
+          <input type="hidden" name="form-name" value="demo-request">
           <div class="bk-grid">
             <div class="bk-field">
               <label for="bk-name">Name</label>
@@ -890,7 +892,7 @@ html.lenis, html.lenis body { height: auto; }
               <label for="bk-agree">I agree to Bet’s <button class="bk-terms-btn" type="button" aria-expanded="false" aria-controls="bk-terms">privacy terms</button>.</label>
             </div>
             <div class="bk-terms" id="bk-terms" hidden>
-              <p>We use your name, company and email only to set up your demo and follow up about Bet. The form reaches our inbox through FormSubmit, an email forwarding service. We don’t sell your details or share them with anyone else, and we’ll delete them whenever you ask at applywithbet@gmail.com. <a href="privacy.html">Read the full Privacy Policy</a>.</p>
+              <p>We use your name, company and email only to set up your demo and follow up about Bet. The form is kept by Netlify, which hosts this site, and reaches our inbox through FormSubmit, an email forwarding service. We don’t sell your details or share them with anyone else, and we’ll delete them whenever you ask at applywithbet@gmail.com. <a href="privacy.html">Read the full Privacy Policy</a>.</p>
             </div>
             <p class="bk-err" id="bk-agree-err"></p>
           </div>
@@ -985,20 +987,22 @@ html.lenis, html.lenis body { height: auto; }
 </footer>
 
 <script>
-// The form. Sending posts it to FormSubmit's AJAX endpoint, which emails it to the team inbox with the visitor's
-// address as Reply-To. The very first send makes FormSubmit email that inbox an "Activate Form" link; nothing is
-// delivered until someone clicks it (the inbox was activated on 2026-11-17). FormSubmit only answers pages served
-// over http(s), not ones opened straight from disk.
-// FormSubmit can be very slow to answer: on 2026-11-17 it took close to a minute while still delivering every
-// email, so a page that waited for its reply told people their request had failed when it hadn't. Now the page
-// waits a few seconds at most. A quick "no", or no connection at all, shows the error. No answer yet means the
-// request is with FormSubmit, so the visitor sees the sent state while the request carries on (keepalive keeps it
-// going if they leave the page). It is sent as an ordinary form post rather than JSON, so the browser sends it
-// at once instead of first checking with FormSubmit's server (a CORS preflight, another slow round trip).
+// The form. Each request goes two ways at once, so one service being down can't lose it:
+//  1. Netlify Forms, on the host that serves this page. Netlify keeps every submission (Forms tab in the Netlify
+//     dashboard, form "demo-request") and emails them out if a form notification is set up there. It finds the
+//     form when the site deploys (data-netlify on the <form>), only if form detection is on for the site. It
+//     answers 404 to a form it doesn't know, so a 200 really means it has the request.
+//  2. FormSubmit, which emails it to the team inbox with the visitor as Reply-To (activated 2026-11-17).
+//     FormSubmit is unreliable: on 2026-11-20 it answered Cloudflare 522 (down) and, when up, took 45 s or more.
+// The sent state shows only once one of them confirms. The old page showed it after 5 s with no answer at all,
+// which is how a real request (Northern State University, 2026-11-20) was lost while FormSubmit was down.
+// If neither confirms, the visitor gets a ready-made email to send instead. Both go as ordinary form posts
+// (no CORS preflight) with keepalive, so they carry on if the visitor leaves. Pages opened from disk can't send.
 (function () {
   var INBOX = 'applywithbet@gmail.com';
-  var ENDPOINT = 'https://formsubmit.co/ajax/' + INBOX;
-  var WAIT = 5000;   // ms to wait for FormSubmit's answer before showing the sent state anyway
+  var FORMSUBMIT = 'https://formsubmit.co/ajax/' + INBOX;
+  var SLOW = 10000;      // ms before the page also offers email while it keeps waiting
+  var GIVE_UP = 75000;   // ms before it stops waiting and says it didn't go through
   var calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var panel = document.querySelector('.demo-panel');
   var form = panel && panel.querySelector('.bk-form');
@@ -1009,7 +1013,7 @@ html.lenis, html.lenis body { height: auto; }
   var status = form.querySelector('.bk-status');
   var terms = document.getElementById('bk-terms');
   var termsBtn = form.querySelector('.bk-terms-btn');
-  var tried = false, busy = false;
+  var tried = false, busy = false, sent = false;
 
   // Checked on send, then again as each field changes, so a message goes away as soon as it's fixed.
   var EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -1049,6 +1053,8 @@ html.lenis, html.lenis body { height: auto; }
   }
   // Sent: the tile keeps its height and Bet takes the form's place.
   function showDone(d) {
+    if (sent) return;
+    sent = true;
     panel.style.minHeight = panel.offsetHeight + 'px';
     doneView.querySelector('.bk-done-sub').textContent =
       'Thanks, ' + d.name.split(/\s+/)[0] + '. We’ll email ' + d.email + ' to find a time that works.';
@@ -1060,41 +1066,44 @@ html.lenis, html.lenis body { height: auto; }
                        { duration: 460, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
     }
   }
-  function failed() {
-    status.innerHTML = 'That didn’t go through. Try again, or email us at <a href="mailto:' + INBOX + '">' + INBOX + '</a>.';
+  // An email with the request already written, for when the form can't confirm it reached us.
+  function mailLink(d, text) {
+    var subject = 'Demo request: ' + d.name + ', ' + d.company;
+    var body = 'Hi Bet team,\n\nI’d like to book a demo.\n\nName: ' + d.name + '\nCompany: ' + d.company +
+               '\nEmail: ' + d.email + '\n';
+    var a = document.createElement('a');
+    a.href = 'mailto:' + INBOX + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+    a.textContent = text;
+    return a;
   }
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
-    if (busy) return;
-    tried = true;
+  function say(parts, note) {
     status.textContent = '';
-    var bad = firstBad();
-    if (bad) { bad.focus(); return; }
-    var d = { name: val('bk-name'), company: val('bk-company'), email: val('bk-email') };
-    if (document.getElementById('bk-honey').value) { showDone(d); return; }   // only a bot fills the hidden field
-    if (location.protocol === 'file:') {   // FormSubmit refuses these (slowly, so the page would wrongly say sent)
-      status.textContent = 'This copy is opened from your computer, so it can’t send. Try it on applywithbet.com.';
-      return;
-    }
-    setBusy(true);
-    var settled = false;
-    function settle(ok) {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timer);
-      setBusy(false);
-      if (ok) showDone(d); else failed();
-    }
-    var timer = setTimeout(function () { settle(true); }, WAIT);
+    status.classList.toggle('is-note', !!note);
+    parts.forEach(function (p) { status.appendChild(typeof p === 'string' ? document.createTextNode(p) : p); });
+  }
+  function warn(msg, extra) { if (window.console) console.warn(msg, extra || ''); }
+
+  // Each returns a promise of true (the service has the request) or false.
+  function viaNetlify(d) {
+    var body = new URLSearchParams();
+    [['form-name', 'demo-request'], ['name', d.name], ['company', d.company], ['email', d.email],
+     ['agree', 'Agreed'], ['_honey', '']].forEach(function (f) { body.append(f[0], f[1]); });
+    return fetch('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: body.toString(),
+      keepalive: true
+    }).then(function (r) {
+      if (!r.ok) warn('Netlify Forms didn’t take the request (' + r.status + '). Is form detection on for the site?');
+      return r.ok;
+    }, function (err) { warn('Couldn’t reach Netlify Forms:', err); return false; });
+  }
+  function viaFormSubmit(d) {
     var body = new URLSearchParams();
     [['name', d.name], ['company', d.company], ['email', d.email], ['privacy_terms', 'Agreed'],
      ['_subject', 'Demo request: ' + d.name + ', ' + d.company], ['_replyto', d.email],
      ['_template', 'table'], ['_captcha', 'false']].forEach(function (f) { body.append(f[0], f[1]); });
-    // A warning after the sent state shows means FormSubmit said no late; the visitor has already been thanked.
-    function warn(msg, extra) {
-      if (window.console) console.warn(msg + (settled ? ' (after the page had already shown it as sent)' : ''), extra || '');
-    }
-    fetch(ENDPOINT, {
+    return fetch(FORMSUBMIT, {
       method: 'POST',
       headers: { 'Accept': 'application/json' },
       body: body,
@@ -1102,11 +1111,48 @@ html.lenis, html.lenis body { height: auto; }
     }).then(function (r) {
       return r.json().then(function (j) {
         var ok = r.ok && (j.success === true || j.success === 'true');
-        // Before activation FormSubmit answers "This form needs Activation...": the console shows its reason.
         if (!ok) warn('FormSubmit refused the request (' + r.status + '):', j.message || j);
         return ok;
       }, function () { warn('FormSubmit sent back something that isn’t JSON (' + r.status + ').'); return false; });
-    }, function (err) { warn('Couldn’t reach FormSubmit:', err); return false; }).then(settle);
+    }, function (err) { warn('Couldn’t reach FormSubmit:', err); return false; });
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (busy) return;
+    tried = true;
+    say([]);
+    var bad = firstBad();
+    if (bad) { bad.focus(); return; }
+    var d = { name: val('bk-name'), company: val('bk-company'), email: val('bk-email') };
+    if (document.getElementById('bk-honey').value) { showDone(d); return; }   // only a bot fills the hidden field
+    if (location.protocol === 'file:') {
+      say(['This copy is opened from your computer, so it can’t send. Try it on applywithbet.com.']);
+      return;
+    }
+    setBusy(true);
+    var gaveUp = false, left = 2;
+    // The first confirmation shows the sent state, even one that arrives after the page gave up waiting.
+    function finish(ok) {
+      if (sent) return;
+      clearTimeout(slow);
+      clearTimeout(giveUp);
+      if (ok) { setBusy(false); say([]); showDone(d); return; }
+      if (gaveUp) return;
+      gaveUp = true;
+      setBusy(false);
+      say(['That didn’t go through. ', mailLink(d, 'Email your request to us'), ' and we’ll set up a time.']);
+    }
+    function answered(ok) {
+      if (ok) finish(true);
+      else if (--left === 0) finish(false);
+    }
+    var slow = setTimeout(function () {
+      if (!sent) say(['Still sending. This can take up to a minute. You can also ', mailLink(d, 'email it to us'), '.'], true);
+    }, SLOW);
+    var giveUp = setTimeout(function () { finish(false); }, GIVE_UP);
+    viaNetlify(d).then(answered);
+    viaFormSubmit(d).then(answered);
   });
 })();
 </script>
